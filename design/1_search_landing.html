@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#066876",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#256ec9",
+              "primary-container": "#267987",
+              "surface-dim": "#d8dadb",
+              "on-error": "#ffffff",
+              "inverse-primary": "#87d2e2",
+              "on-secondary-container": "#50686d",
+              "primary-fixed": "#a3eeff",
+              "on-surface": "#191c1d",
+              "on-secondary-fixed-variant": "#334b4f",
+              "background": "#f8fafb",
+              "on-tertiary-fixed": "#001b3d",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#cde7ed",
+              "tertiary-fixed": "#d6e3ff",
+              "surface-container-highest": "#e1e3e4",
+              "secondary": "#4a6267",
+              "inverse-on-surface": "#eff1f2",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#f8fafb",
+              "inverse-surface": "#2e3132",
+              "outline-variant": "#bdc9ca",
+              "on-primary-fixed-variant": "#004e5a",
+              "surface": "#f8fafb",
+              "secondary-container": "#cde7ed",
+              "on-tertiary-container": "#eff3ff",
+              "primary-fixed-dim": "#87d2e2",
+              "on-primary-container": "#dcf8ff",
+              "surface-variant": "#e1e3e4",
+              "on-secondary-fixed": "#051f23",
+              "on-primary": "#ffffff",
+              "surface-container": "#eceeef",
+              "primary": "#00606d",
+              "on-surface-variant": "#3e494a",
+              "surface-container-high": "#e6e8e9",
+              "tertiary-fixed-dim": "#a9c7ff",
+              "on-tertiary-fixed-variant": "#00468c",
+              "surface-container-low": "#f2f4f5",
+              "secondary-fixed-dim": "#b1cbd1",
+              "on-primary-fixed": "#001f25",
+              "tertiary": "#0055a8",
+              "outline": "#6e797a",
+              "error": "#ba1a1a",
+              "on-background": "#191c1d",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #00606d 0%, #267987 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar Component -->
+<nav class="fixed top-0 w-full z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-[#bdc9ca]/30 dark:border-[#bdc9ca]/10 shadow-sm dark:shadow-none flex items-center justify-between px-6 h-16 w-full font-['Manrope'] tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-[#007B85] dark:text-[#267987]">BioLink v2</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#007B85] duration-200 ease-in-out" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-6 pt-16 relative overflow-hidden">
+<!-- Subtle Background Decorative Elements -->
+<div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-tertiary/5 rounded-full blur-[100px]"></div>
+<!-- Hero Section -->
+<div class="w-full max-w-4xl text-center space-y-12 relative z-10">
+<!-- Tagline and Header -->
+<div class="space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="science">science</span>
+<span class="text-[0.6875rem] uppercase tracking-[0.15em] font-semibold text-on-surface-variant font-label">Advanced Clinical Intelligence</span>
+</div>
+<h1 class="font-headline text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-on-surface max-w-3xl mx-auto leading-tight">
+                    Discover potential drug repurposing candidates using <span class="text-primary">knowledge graph AI</span>
+</h1>
+</div>
+<!-- Search Bar Container -->
+<div class="max-w-3xl mx-auto">
+<div class="group relative flex items-center p-2 rounded-xl bg-surface-container-lowest shadow-[0px_20px_40px_rgba(25,28,29,0.06)] ring-1 ring-outline-variant/20 focus-within:ring-primary/30 transition-all duration-300">
+<div class="flex-grow flex items-center pl-4">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline text-lg py-4 px-4 font-body" placeholder="Enter a disease (e.g., Alzheimer's disease, Type 2 Diabetes)" type="text"/>
+</div>
+<button class="hero-gradient text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-all duration-200 flex items-center gap-2">
+<span>Search</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Example Chips -->
+<div class="mt-8 flex flex-wrap justify-center gap-3">
+<span class="text-label text-on-surface-variant font-medium self-center mr-2">Try searching:</span>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-sm font-medium hover:bg-surface-container-high hover:text-primary transition-colors duration-200 border border-transparent hover:border-primary/20">Alzheimer's</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-sm font-medium hover:bg-surface-container-high hover:text-primary transition-colors duration-200 border border-transparent hover:border-primary/20">Type 2 Diabetes</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-sm font-medium hover:bg-surface-container-high hover:text-primary transition-colors duration-200 border border-transparent hover:border-primary/20">Parkinson's</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-sm font-medium hover:bg-surface-container-high hover:text-primary transition-colors duration-200 border border-transparent hover:border-primary/20">Multiple Sclerosis</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-low text-on-surface text-sm font-medium hover:bg-surface-container-high hover:text-primary transition-colors duration-200 border border-transparent hover:border-primary/20">Hypertension</button>
+</div>
+</div>
+<!-- Features Bento-lite (Social Proof / Stats) -->
+<div class="pt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+<div class="p-6 rounded-xl bg-surface-container-low border-l-4 border-primary/40 text-left space-y-2">
+<div class="text-primary font-headline text-2xl font-bold">12M+</div>
+<div class="text-on-surface-variant text-sm font-body">Biomedical Relations Maped</div>
+</div>
+<div class="p-6 rounded-xl bg-surface-container-low border-l-4 border-tertiary/40 text-left space-y-2">
+<div class="text-tertiary font-headline text-2xl font-bold">98%</div>
+<div class="text-on-surface-variant text-sm font-body">Confidence Index Accuracy</div>
+</div>
+<div class="p-6 rounded-xl bg-surface-container-low border-l-4 border-primary-container/40 text-left space-y-2">
+<div class="text-primary-container font-headline text-2xl font-bold">Real-time</div>
+<div class="text-on-surface-variant text-sm font-body">Clinical Trial Integration</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="w-full py-8 mt-auto bg-[#f8fafb] dark:bg-slate-900 border-t border-[#bdc9ca]/20 flex flex-col items-center justify-center text-center gap-4 px-8">
+<div class="flex flex-wrap justify-center gap-6 mb-2">
+<a class="text-slate-400 hover:text-[#007B85] font-['Inter'] text-[0.6875rem] uppercase tracking-widest ease-in transition-all" href="#">FDA Disclaimers</a>
+<a class="text-slate-400 hover:text-[#007B85] font-['Inter'] text-[0.6875rem] uppercase tracking-widest ease-in transition-all" href="#">Privacy Policy</a>
+<a class="text-slate-400 hover:text-[#007B85] font-['Inter'] text-[0.6875rem] uppercase tracking-widest ease-in transition-all" href="#">Terms of Service</a>
+</div>
+<p class="text-slate-400 font-['Inter'] text-[0.6875rem] uppercase tracking-widest">
+            © 2024 BioLink v2. Professional Medical Research Tool. For clinical drug discovery purposes only.
+        </p>
+</footer>
+</body></html>

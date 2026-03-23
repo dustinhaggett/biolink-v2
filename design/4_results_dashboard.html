@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BioLink v2 - Results Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#066876",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#256ec9",
+                        "primary-container": "#267987",
+                        "surface-dim": "#d8dadb",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#87d2e2",
+                        "on-secondary-container": "#50686d",
+                        "primary-fixed": "#a3eeff",
+                        "on-surface": "#191c1d",
+                        "on-secondary-fixed-variant": "#334b4f",
+                        "background": "#f8fafb",
+                        "on-tertiary-fixed": "#001b3d",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#cde7ed",
+                        "tertiary-fixed": "#d6e3ff",
+                        "surface-container-highest": "#e1e3e4",
+                        "secondary": "#4a6267",
+                        "inverse-on-surface": "#eff1f2",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f8fafb",
+                        "inverse-surface": "#2e3132",
+                        "outline-variant": "#bdc9ca",
+                        "on-primary-fixed-variant": "#004e5a",
+                        "surface": "#f8fafb",
+                        "secondary-container": "#cde7ed",
+                        "on-tertiary-container": "#eff3ff",
+                        "primary-fixed-dim": "#87d2e2",
+                        "on-primary-container": "#dcf8ff",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed": "#051f23",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#eceeef",
+                        "primary": "#00606d",
+                        "on-surface-variant": "#3e494a",
+                        "surface-container-high": "#e6e8e9",
+                        "tertiary-fixed-dim": "#a9c7ff",
+                        "on-tertiary-fixed-variant": "#00468c",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-fixed-dim": "#b1cbd1",
+                        "on-primary-fixed": "#001f25",
+                        "tertiary": "#0055a8",
+                        "outline": "#6e797a",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition {
+            background: linear-gradient(180deg, rgba(236, 238, 239, 1) 0%, rgba(248, 250, 251, 1) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-[#bdc9ca]/30 dark:border-[#bdc9ca]/10 shadow-sm dark:shadow-none flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-[#007B85] dark:text-[#267987] font-['Manrope'] tracking-tight">BioLink v2</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:text-[#007B85] font-['Manrope'] tracking-tight transition-colors duration-200 ease-in-out" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined text-slate-600">account_circle</span>
+</button>
+</div>
+</nav>
+<div class="flex min-h-screen pt-16">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 pt-20 bg-[#eceeef] dark:bg-slate-950 flex flex-col h-full gap-2 p-4 font-['Inter'] text-sm font-medium tonal-transition">
+<div class="px-4 mb-6">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">science</span>
+</div>
+<div>
+<p class="text-on-surface font-bold text-xs uppercase tracking-wider">Research Portal</p>
+<p class="text-slate-500 text-[10px] uppercase tracking-widest">Clinical Precision</p>
+</div>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-900/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#007B85] bg-white dark:bg-slate-900 rounded-l-none border-l-4 border-[#007B85] transition-all duration-300" href="#">
+<span class="material-symbols-outlined">science</span>
+<span>Research</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-900/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span>FDA Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-900/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-md font-semibold text-sm shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                    New Analysis
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 p-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-10">
+<div class="space-y-1">
+<p class="text-label-sm font-label text-slate-500 uppercase tracking-widest">Analysis Results</p>
+<h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight">Results for: <span class="text-primary">Alzheimer's Disease</span></h1>
+</div>
+<button class="flex items-center gap-2 px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold rounded-lg transition-colors duration-200">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export CSV</span>
+</button>
+</div>
+<div class="flex gap-8">
+<!-- Filters Sidebar -->
+<aside class="w-72 flex-shrink-0 space-y-8">
+<section>
+<h3 class="font-headline text-sm font-bold text-on-surface mb-4 uppercase tracking-wider">Confidence Threshold</h3>
+<div class="px-2">
+<input class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary" max="100" min="0" type="range" value="75"/>
+<div class="flex justify-between mt-2 text-[10px] font-bold text-slate-400">
+<span>0%</span>
+<span class="text-primary">Min: 75%</span>
+<span>100%</span>
+</div>
+</div>
+</section>
+<section>
+<h3 class="font-headline text-sm font-bold text-on-surface mb-4 uppercase tracking-wider">FDA Status</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center">
+<input checked="" class="peer h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+</div>
+<span class="text-sm font-medium text-on-surface-variant group-hover:text-on-surface">Approved</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface-variant group-hover:text-on-surface">Clinical Trial</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface-variant group-hover:text-on-surface">Experimental</span>
+</label>
+</div>
+</section>
+<div class="p-6 bg-surface-container-low rounded-xl">
+<p class="text-xs text-on-surface-variant leading-relaxed italic">
+                            Showing top 10 candidates filtered by clinical relevance and biochemical pathway alignment scores.
+                        </p>
+</div>
+</aside>
+<!-- Results List -->
+<div class="flex-1 space-y-4">
+<!-- Expanded Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_20px_40px_rgba(25,28,29,0.06)] overflow-hidden border-l-4 border-tertiary">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<h2 class="font-headline text-xl font-bold text-on-surface">Lecanemab-IRM</h2>
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold rounded-full uppercase tracking-wider">Approved</span>
+</div>
+<p class="text-sm text-on-surface-variant">Anti-amyloid protofibril monoclonal antibody targeting beta-amyloid clearance.</p>
+</div>
+<div class="flex flex-col items-end">
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-xs font-bold rounded-full">94% CONFIDENCE</span>
+<span class="text-[10px] text-slate-400 mt-1">Ref ID: RX-9902</span>
+</div>
+</div>
+<!-- Expanded Details -->
+<div class="mt-8 pt-8 border-t border-outline-variant/20 space-y-8">
+<section>
+<h4 class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Mechanism Summary</h4>
+<p class="text-sm text-on-surface leading-relaxed max-w-3xl">
+                                        Lecanemab selectively binds to neutralize and eliminate soluble, toxic amyloid-beta aggregates (protofibrils) that are thought to contribute to the neurodegenerative process in Alzheimer's disease. The high confidence score is derived from Phase III Clarity AD trial data showing a 27% reduction in clinical decline.
+                                    </p>
+</section>
+<div class="grid grid-cols-2 gap-8">
+<section>
+<h4 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Knowledge Graph Path</h4>
+<div class="flex items-center gap-4 py-4 px-6 bg-surface-container-low rounded-lg">
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-xl">psychology</span>
+</div>
+<span class="text-[10px] mt-2 font-bold uppercase tracking-tighter">Alzheimer's</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-xl">genetics</span>
+</div>
+<span class="text-[10px] mt-2 font-bold uppercase tracking-tighter">APP Gene</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-xl">pill</span>
+</div>
+<span class="text-[10px] mt-2 font-bold uppercase tracking-tighter text-primary">Lecanemab</span>
+</div>
+</div>
+</section>
+<section>
+<h4 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">PubMed Evidence</h4>
+<ul class="space-y-2">
+<li>
+<a class="group flex items-center justify-between p-3 bg-surface-container-low hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="text-xs font-medium text-on-surface truncate pr-4">PMID: 36599810 - Phase 3 Clarity AD Trial</span>
+<span class="material-symbols-outlined text-primary text-sm opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</a>
+</li>
+<li>
+<a class="group flex items-center justify-between p-3 bg-surface-container-low hover:bg-surface-container-high rounded-lg transition-colors" href="#">
+<span class="text-xs font-medium text-on-surface truncate pr-4">PMID: 34154321 - Protofibril Selectivity Analysis</span>
+<span class="material-symbols-outlined text-primary text-sm opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</a>
+</li>
+</ul>
+</section>
+</div>
+</div>
+</div>
+</div>
+<!-- Compact Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl border-l-4 border-slate-300 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+<div class="p-5 flex justify-between items-center">
+<div class="flex items-center gap-6">
+<div class="space-y-0.5">
+<div class="flex items-center gap-3">
+<h3 class="font-headline text-lg font-bold text-on-surface">Donanemab</h3>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">Clinical Trial</span>
+</div>
+<p class="text-xs text-on-surface-variant">Targets N-terminally truncated forms of beta-amyloid (pGlu3-Aβ).</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="px-2.5 py-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded-full">87% CONFIDENCE</span>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Compact Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl border-l-4 border-slate-300 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+<div class="p-5 flex justify-between items-center">
+<div class="flex items-center gap-6">
+<div class="space-y-0.5">
+<div class="flex items-center gap-3">
+<h3 class="font-headline text-lg font-bold text-on-surface">ALZ-801</h3>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full uppercase tracking-wider">Clinical Trial</span>
+</div>
+<p class="text-xs text-on-surface-variant">Oral inhibitor of amyloid oligomer formation; Phase III (APOLLOE4).</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="px-2.5 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full">72% CONFIDENCE</span>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Compact Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl border-l-4 border-slate-300 hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+<div class="p-5 flex justify-between items-center">
+<div class="flex items-center gap-6">
+<div class="space-y-0.5">
+<div class="flex items-center gap-3">
+<h3 class="font-headline text-lg font-bold text-on-surface">Gantenerumab</h3>
+<span class="px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-bold rounded-full uppercase tracking-wider">Experimental</span>
+</div>
+<p class="text-xs text-on-surface-variant">Subcutaneous monoclonal antibody targeting both oligomers and fibrils.</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<span class="px-2.5 py-1 bg-error-container text-on-error-container text-[10px] font-bold rounded-full">48% CONFIDENCE</span>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</div>
+</div>
+</div>
+<!-- More Cards Simulated -->
+<div class="pt-4 flex justify-center">
+<button class="text-sm font-bold text-primary flex items-center gap-2 px-4 py-2 hover:bg-primary/5 rounded-full transition-colors">
+                            Show 6 more candidates
+                            <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-8 mt-auto bg-[#f8fafb] dark:bg-slate-900 border-t border-[#bdc9ca]/20 flex flex-col items-center justify-center text-center gap-4 px-8 ml-64">
+<p class="font-['Inter'] text-[0.6875rem] uppercase tracking-widest text-slate-400">
+            © 2024 BioLink v2. Professional Medical Research Tool. For clinical drug discovery purposes only.
+        </p>
+<div class="flex gap-6">
+<a class="font-['Inter'] text-[0.6875rem] uppercase tracking-widest text-slate-400 hover:text-[#007B85] transition-colors ease-in" href="#">FDA Disclaimers</a>
+<a class="font-['Inter'] text-[0.6875rem] uppercase tracking-widest text-slate-400 hover:text-[#007B85] transition-colors ease-in" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[0.6875rem] uppercase tracking-widest text-slate-400 hover:text-[#007B85] transition-colors ease-in" href="#">Terms of Service</a>
+</div>
+</footer>
+</body></html>

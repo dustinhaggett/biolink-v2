@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Discovery Progress - BioLink v2</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-tint": "#066876",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#256ec9",
+              "primary-container": "#267987",
+              "surface-dim": "#d8dadb",
+              "on-error": "#ffffff",
+              "inverse-primary": "#87d2e2",
+              "on-secondary-container": "#50686d",
+              "primary-fixed": "#a3eeff",
+              "on-surface": "#191c1d",
+              "on-secondary-fixed-variant": "#334b4f",
+              "background": "#f8fafb",
+              "on-tertiary-fixed": "#001b3d",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#cde7ed",
+              "tertiary-fixed": "#d6e3ff",
+              "surface-container-highest": "#e1e3e4",
+              "secondary": "#4a6267",
+              "inverse-on-surface": "#eff1f2",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#f8fafb",
+              "inverse-surface": "#2e3132",
+              "outline-variant": "#bdc9ca",
+              "on-primary-fixed-variant": "#004e5a",
+              "surface": "#f8fafb",
+              "secondary-container": "#cde7ed",
+              "on-tertiary-container": "#eff3ff",
+              "primary-fixed-dim": "#87d2e2",
+              "on-primary-container": "#dcf8ff",
+              "surface-variant": "#e1e3e4",
+              "on-secondary-fixed": "#051f23",
+              "on-primary": "#ffffff",
+              "surface-container": "#eceeef",
+              "primary": "#00606d",
+              "on-surface-variant": "#3e494a",
+              "surface-container-high": "#e6e8e9",
+              "tertiary-fixed-dim": "#a9c7ff",
+              "on-tertiary-fixed-variant": "#00468c",
+              "surface-container-low": "#f2f4f5",
+              "secondary-fixed-dim": "#b1cbd1",
+              "on-primary-fixed": "#001f25",
+              "tertiary": "#0055a8",
+              "outline": "#6e797a",
+              "error": "#ba1a1a",
+              "on-background": "#191c1d",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 2s linear infinite;
+      }
+      .shimmer {
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-6 h-16 w-full border-b border-[#bdc9ca]/30 shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-[#007B85] font-['Manrope'] tracking-tight">BioLink v2</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-600 hover:text-[#007B85] font-['Manrope'] tracking-tight duration-200 ease-in-out" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 hover:bg-slate-50 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-50 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 pt-20 bg-[#eceeef] flex flex-col h-full gap-2 p-4 font-['Inter'] text-sm font-medium tonal-transition flat no shadows">
+<div class="px-4 py-2 mb-4">
+<p class="text-xs uppercase tracking-widest text-slate-500 font-bold">Research Portal</p>
+<p class="text-[10px] text-[#007B85]">Clinical Precision</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#007B85] bg-white rounded-l-none border-l-4 border-[#007B85] transition-all duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">science</span>
+<span>Research</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span>FDA Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-white/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<button class="mt-8 mx-2 bg-gradient-to-br from-[#00606d] to-[#267987] text-white py-2.5 px-4 rounded-lg font-semibold shadow-sm hover:opacity-90 transition-opacity">
+            New Analysis
+        </button>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 pt-16 min-h-screen flex flex-col">
+<div class="max-w-4xl mx-auto w-full px-8 py-12 flex-grow">
+<!-- Discovery Header Section -->
+<header class="mb-12">
+<h1 class="font-headline text-display-lg text-on-surface font-extrabold tracking-tight mb-2">Analyzing Compound BL-4092</h1>
+<p class="text-on-surface-variant font-body">Synthesizing multi-modal clinical data for molecular target identification.</p>
+</header>
+<!-- Loading Visualization Canvas -->
+<section class="grid grid-cols-12 gap-6">
+<!-- Main Status Card -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest p-8 rounded-xl shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-surface-container">
+<div class="h-full bg-primary w-2/3 transition-all duration-1000 ease-in-out relative">
+<div class="shimmer absolute inset-0"></div>
+</div>
+</div>
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline text-xl text-primary font-bold">Discovery Engine</h2>
+<span class="bg-primary-container/20 text-primary px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">68% Complete</span>
+</div>
+<!-- Progress Steps -->
+<div class="space-y-8">
+<!-- Step 1: Complete -->
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow pt-1">
+<h3 class="font-bold text-on-surface">Querying knowledge graph...</h3>
+<p class="text-xs text-on-surface-variant mt-1">12,408 nodes mapped. Protein-protein interactions verified.</p>
+</div>
+</div>
+<!-- Step 2: Complete -->
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-grow pt-1">
+<h3 class="font-bold text-on-surface">Enriching with PubMed evidence...</h3>
+<p class="text-xs text-on-surface-variant mt-1">Found 14 relevant clinical trials and 42 meta-analyses.</p>
+</div>
+</div>
+<!-- Step 3: In Progress -->
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white animate-pulse">
+<span class="material-symbols-outlined animate-spin-slow">sync</span>
+</div>
+<div class="flex-grow pt-1">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-primary">Checking FDA approval status...</h3>
+<span class="text-[10px] font-mono text-primary-container bg-primary/5 px-2 py-0.5 rounded">RUNNING_0x4F</span>
+</div>
+<div class="mt-3 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/3 rounded-full relative">
+<div class="shimmer absolute inset-0"></div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant mt-2 italic">Matching against CDER regulatory databases...</p>
+</div>
+</div>
+<!-- Step 4: Pending -->
+<div class="flex items-start gap-4 opacity-40">
+<div class="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-outline">
+<span class="material-symbols-outlined">pending</span>
+</div>
+<div class="flex-grow pt-1">
+<h3 class="font-bold text-on-surface">Generating explanations...</h3>
+<p class="text-xs text-on-surface-variant mt-1">Awaiting previous step completion.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Data Module (Side) -->
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<!-- Real-time Stream -->
+<div class="bg-surface-container-low p-6 rounded-xl border-l-4 border-tertiary">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary text-sm">terminal</span>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Live Inference Stream</span>
+</div>
+<div class="space-y-3 font-mono text-[10px] text-on-surface-variant">
+<div class="flex gap-2">
+<span class="text-tertiary">[14:22:01]</span>
+<span>GET_REGULATORY_PATHWAY: Breakthrough_Status</span>
+</div>
+<div class="flex gap-2">
+<span class="text-tertiary">[14:22:05]</span>
+<span>AUTH_ORPHAN_DRUG_DESIGNATION: Verified</span>
+</div>
+<div class="flex gap-2 opacity-60">
+<span class="text-tertiary">[14:22:09]</span>
+<span>SCANNING: IND_Module_4_Safety_Reports</span>
+</div>
+<div class="flex gap-2 opacity-40">
+<span class="text-tertiary">[14:22:12]</span>
+<span>PARSING: clinical_trial_results_v2.json</span>
+</div>
+</div>
+</div>
+<!-- Molecule Metadata -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 bg-secondary-container rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">matter</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">BL-4092 Structure</h4>
+<p class="text-xs text-on-surface-variant">Molecular Weight: 442.5 g/mol</p>
+</div>
+</div>
+<div class="h-32 bg-surface-container-low rounded-lg flex items-center justify-center overflow-hidden">
+<img class="opacity-40 mix-blend-multiply h-full w-full object-cover" data-alt="Technical molecular structure diagram of chemical compound" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDagnyRBe75GYxcKZtLtFR1OyYa7cRWBH5aSW5JZ5gWQipfqb6h_74nPkSVJANLROZHhz8tovwKVsLhqgBxCRSojJtX3EoIpEPErN9pyc8a2G7GyILYtaLUNSP-Cr7kDrgC1--gvk1d7A8_cVK__rfSv8u4SWWcndsigrX5QCLhlIL-IEQSqGlYbdTsGbA2ZJCvOA0xWcrBxursYcL9t4ec0utOcE0qkDKyfXmCEDEzpPE1Ih02kEPKHw51jzGLXFsXpMRTTt01vOE"/>
+</div>
+<div class="mt-4 flex gap-2">
+<span class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded uppercase">Target: HER2</span>
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">Phase II Ready</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="w-full py-8 mt-auto bg-[#f8fafb] flex flex-col items-center justify-center text-center gap-4 px-8 ml-64 border-t border-[#bdc9ca]/20 font-['Inter'] text-[0.6875rem] uppercase tracking-widest text-slate-400">
+<div class="flex gap-6 mb-2">
+<a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">FDA Disclaimers</a>
+<a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Terms of Service</a>
+</div>
+<p>© 2024 BioLink v2. Professional Medical Research Tool. For clinical drug discovery purposes only.</p>
+</footer>
+</main>
+</body></html>
