@@ -1,0 +1,26 @@
+# Environment
+.env
+__pycache__/
+*.pyc
+
+# Large binary data (not suitable for git)
+data/BioWordVec_PubMed_MIMICIII_d200.vec.bin
+data/CTD_chemicals_diseases.tsv.gz
+
+# Model weights
+models/*.pt
+
+# Validation artifacts (reproducible via scripts/)
+data/val_logits.npy
+data/val_labels.npy
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Claude Code local config
+.claude/
+
+# Archive
+*.zip
