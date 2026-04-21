@@ -38,6 +38,7 @@ class BioLinkModel:
         weights_path: str | Path,
         biowordvec_path: str | Path,
         drugs_list_path: str | Path = "data/drugs_list.txt",
+        diseases_list_path: str | Path | None = None,
     ):
         # Use MPS locally when available, with CPU fallback.
         self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
@@ -62,6 +63,17 @@ class BioLinkModel:
             raise ValueError(
                 f"Expected cached drug matrix shape (7164, 200), got {self.drug_embeddings.shape}"
             )
+
+        # Pre-embed diseases for reverse search (drug -> diseases)
+        self.disease_names: List[str] = []
+        self.disease_embeddings: np.ndarray | None = None
+        if diseases_list_path:
+            diseases_path = Path(diseases_list_path)
+            if diseases_path.exists():
+                self.disease_names = [
+                    line.strip() for line in diseases_path.read_text(encoding="utf-8").splitlines() if line.strip()
+                ]
+                self.disease_embeddings = self._embed_texts(self.disease_names)
 
     def _load_drug_names(self, drugs_list_path: str | Path) -> List[str]:
         path = Path(drugs_list_path)
@@ -109,6 +121,32 @@ class BioLinkModel:
         with torch.no_grad():
             logit = self.model(x).item()
         return float(logit)
+
+    def score_all_diseases(self, drug_vec: np.ndarray) -> List[Tuple[str, float]]:
+        """Returns [(disease_name, raw_logit), ...] sorted descending."""
+        if self.disease_embeddings is None or len(self.disease_names) == 0:
+            raise RuntimeError("Disease embeddings not loaded. Pass diseases_list_path to constructor.")
+
+        drug_vec = np.asarray(drug_vec, dtype=np.float32).reshape(1, self.embedding_dim)
+        drug_matrix = np.broadcast_to(drug_vec, self.disease_embeddings.shape)
+
+        # Feature order: [drug, disease, |drug-disease|, drug*disease]
+        features = np.concatenate(
+            [
+                drug_matrix,
+                self.disease_embeddings,
+                np.abs(drug_matrix - self.disease_embeddings),
+                drug_matrix * self.disease_embeddings,
+            ],
+            axis=1,
+        ).astype(np.float32, copy=False)
+
+        x = torch.from_numpy(features).to(self.device)
+        with torch.no_grad():
+            logits = self.model(x).detach().cpu().numpy()
+
+        sort_idx = np.argsort(logits)[::-1]
+        return [(self.disease_names[i], float(logits[i])) for i in sort_idx]
 
     def score_all_drugs(self, disease_vec: np.ndarray) -> List[Tuple[str, float]]:
         # Returns [(drug_name, raw_logit), ...] for all drugs in drugs_list

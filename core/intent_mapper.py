@@ -229,6 +229,66 @@ def map_disease(user_input: str, candidate_diseases: List[str]) -> Dict[str, Any
         return _fallback_map_disease(user_input=user_input.strip(), candidate_diseases=candidate_diseases)
 
 
+def map_drug(user_input: str, candidate_drugs: List[str]) -> Dict[str, Any]:
+    """
+    Map free-text drug input to the best matching drug in the drugs list.
+    Uses fuzzy string matching only (no LLM call — drug names are standardized).
+
+    Returns:
+        {
+            "drug_entity": str | None,
+            "display_name": str,
+            "clarification": str | None
+        }
+    """
+    if not isinstance(user_input, str) or not user_input.strip():
+        return {"drug_entity": None, "display_name": "", "clarification": "Please enter a drug name."}
+    if not candidate_drugs:
+        return {"drug_entity": None, "display_name": "", "clarification": "Drug list not loaded."}
+
+    query = user_input.strip()
+
+    def normalize(text: str) -> str:
+        return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+    norm_query = normalize(query)
+    norm_to_original = {normalize(d): d for d in candidate_drugs}
+    norm_candidates = list(norm_to_original.keys())
+
+    # Exact match first
+    if norm_query in norm_to_original:
+        drug = norm_to_original[norm_query]
+        return {"drug_entity": drug, "display_name": drug, "clarification": None}
+
+    # Fuzzy match
+    matches = difflib.get_close_matches(norm_query, norm_candidates, n=1, cutoff=0.6)
+    if matches:
+        drug = norm_to_original[matches[0]]
+        return {"drug_entity": drug, "display_name": drug, "clarification": None}
+
+    # Token overlap fallback
+    query_tokens = set(norm_query.split())
+    if query_tokens:
+        best_drug = None
+        best_overlap = 0.0
+        for drug in candidate_drugs:
+            drug_tokens = set(normalize(drug).split())
+            if not drug_tokens:
+                continue
+            overlap = len(query_tokens & drug_tokens) / len(query_tokens | drug_tokens)
+            if overlap > best_overlap:
+                best_overlap = overlap
+                best_drug = drug
+        if best_drug and best_overlap >= 0.4:
+            return {"drug_entity": best_drug, "display_name": best_drug, "clarification": None}
+
+    return {
+        "drug_entity": None,
+        "display_name": query,
+        "clarification": f"Could not find '{query}' in the drug database. Try a different name.",
+    }
+
+
 if __name__ == "__main__":
     diseases = load_candidate_diseases(DEFAULT_DISEASES_PATH)
     print(f"Loaded {len(diseases)} candidate diseases from {DEFAULT_DISEASES_PATH}")

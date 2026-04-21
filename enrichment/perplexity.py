@@ -21,21 +21,34 @@ _ENDPOINT = "https://api.perplexity.ai/chat/completions"
 _SEARCH_PROMPT = """\
 I'm researching whether the drug **{drug}** could be repurposed to treat **{disease}**.
 
-Start your response with EXACTLY one of these verdict lines (pick the most accurate):
-VERDICT: SUPPORTS — if evidence suggests this drug may help treat this disease
-VERDICT: STANDARD-OF-CARE — if this drug is already an established treatment for this disease
-VERDICT: CONFLICTS — if evidence suggests this drug would be ineffective or harmful for this disease
-VERDICT: INSUFFICIENT — if there is little or no evidence linking this drug to this disease
+Start your response with these structured lines (one per line):
 
-Then on the next line, write a single-sentence TL;DR starting with "TLDR:" that summarizes the key finding.
+VERDICT: [pick ONE: SUPPORTS | STANDARD-OF-CARE | CONFLICTS | INSUFFICIENT]
+TLDR: [one-sentence summary of the key finding]
+EVIDENCE_QUALITY: [pick ONE: RCT | Human Study | Preclinical | Case Report | Theoretical]
+PATHWAY: {drug} -> [molecular target] -> [pathway/mechanism] -> [disease effect]
+INTERACTIONS: [YES or NO — does {drug} have known dangerous interactions with standard treatments for {disease}?]
 
 Then provide:
 1. **Mechanism**: How might {drug} work against {disease}? What biological pathways are involved?
 2. **Key studies**: Summarize the most relevant published studies (include authors, year, and journal if possible).
 3. **Clinical trials**: Are there any ongoing or completed clinical trials of {drug} for {disease}?
 4. **Evidence strength**: How strong is the overall evidence? (preclinical only, small human studies, large RCTs, etc.)
+5. **Interactions**: If YES above, briefly list the specific interactions with standard-of-care drugs for {disease}.
 
 Be concise and factual. If evidence is limited or absent, say so clearly.\
+"""
+
+_FOLLOWUP_PROMPT = """\
+Context: The drug **{drug}** was predicted as a repurposing candidate for **{disease}**.
+
+Prior evidence summary:
+{prior_evidence}
+
+User's follow-up question: {question}
+
+Answer the question concisely and factually, grounded in published biomedical evidence. \
+If the answer is unknown or uncertain, say so. Include a brief medical disclaimer.\
 """
 
 # Domains considered credible for biomedical evidence
@@ -112,16 +125,52 @@ def _parse_tldr(text: str) -> str | None:
     return None
 
 
+_QUALITY_NORMALIZE = {
+    "rct": "RCT",
+    "human study": "Human Study",
+    "preclinical": "Preclinical",
+    "case report": "Case Report",
+    "theoretical": "Theoretical",
+}
+
+
+def _parse_evidence_quality(text: str) -> str:
+    """Extract evidence quality classification from the response."""
+    match = re.search(r"EVIDENCE_QUALITY:\s*(RCT|Human Study|Preclinical|Case Report|Theoretical)", text, re.IGNORECASE)
+    if match:
+        return _QUALITY_NORMALIZE.get(match.group(1).lower(), "Unknown")
+    return "Unknown"
+
+
+def _parse_pathway(text: str) -> str | None:
+    """Extract the pathway chain from the response."""
+    match = re.search(r"PATHWAY:\s*(.+)", text)
+    if match:
+        pathway = match.group(1).strip().strip("*").strip()
+        return pathway if pathway else None
+    return None
+
+
+def _parse_interactions(text: str) -> bool:
+    """Check if the response flags drug interactions."""
+    match = re.search(r"INTERACTIONS:\s*(YES|NO)", text, re.IGNORECASE)
+    if match:
+        return match.group(1).upper() == "YES"
+    return False
+
+
+_STRUCTURED_PREFIXES = ("VERDICT:", "TLDR:", "EVIDENCE_QUALITY:", "PATHWAY:", "INTERACTIONS:")
+
+
 def _clean_summary(text: str) -> str:
-    """Remove the verdict and TLDR lines from the summary body."""
+    """Remove structured header lines from the summary body."""
     lines = text.split("\n")
     cleaned = []
     for line in lines:
         stripped = line.strip().lstrip("*").strip()
-        if stripped.startswith("VERDICT:") or stripped.startswith("TLDR:"):
+        if any(stripped.startswith(p) for p in _STRUCTURED_PREFIXES):
             continue
         cleaned.append(line)
-    # Strip leading blank lines
     result = "\n".join(cleaned).strip()
     return result
 
@@ -152,13 +201,7 @@ def search_drug_disease(drug: str, disease: str) -> dict:
     """
     api_key = _get_api_key()
     if not api_key:
-        return {
-            "summary": None,
-            "verdict": "insufficient",
-            "tldr": None,
-            "citations": [],
-            "error": "PERPLEXITY_API_KEY is not configured",
-        }
+        return _empty_evidence("PERPLEXITY_API_KEY is not configured")
 
     prompt = _SEARCH_PROMPT.format(drug=drug, disease=disease)
 
@@ -187,19 +230,79 @@ def search_drug_disease(drug: str, disease: str) -> dict:
         citations = _filter_citations(data.get("citations", []))
         verdict = _parse_verdict(raw_text)
         tldr = _parse_tldr(raw_text)
+        evidence_quality = _parse_evidence_quality(raw_text)
+        pathway = _parse_pathway(raw_text)
+        has_interactions = _parse_interactions(raw_text)
         summary = _clean_summary(raw_text) if raw_text else None
 
         return {
             "summary": summary or None,
             "verdict": verdict,
             "tldr": tldr,
+            "evidence_quality": evidence_quality,
+            "pathway": pathway,
+            "has_interactions": has_interactions,
             "citations": citations,
             "error": None,
         }
 
     except requests.exceptions.Timeout:
         logger.warning("Perplexity API timeout for %s / %s", drug, disease)
-        return {"summary": None, "verdict": "insufficient", "tldr": None, "citations": [], "error": "Search timed out"}
+        return _empty_evidence("Search timed out")
     except Exception as exc:
         logger.warning("Perplexity API error for %s / %s: %s", drug, disease, exc)
-        return {"summary": None, "verdict": "insufficient", "tldr": None, "citations": [], "error": str(exc)}
+        return _empty_evidence(str(exc))
+
+
+def _empty_evidence(error: str | None = None) -> dict:
+    """Return an empty evidence dict."""
+    return {
+        "summary": None, "verdict": "insufficient", "tldr": None,
+        "evidence_quality": "Unknown", "pathway": None,
+        "has_interactions": False, "citations": [], "error": error,
+    }
+
+
+def ask_followup(drug: str, disease: str, question: str, prior_evidence: str) -> dict:
+    """
+    Ask a follow-up question about a drug-disease pair, grounded in prior evidence.
+
+    Returns dict with "answer" and "citations" keys.
+    """
+    api_key = _get_api_key()
+    if not api_key:
+        return {"answer": None, "citations": [], "error": "PERPLEXITY_API_KEY is not configured"}
+
+    prompt = _FOLLOWUP_PROMPT.format(
+        drug=drug, disease=disease, question=question,
+        prior_evidence=prior_evidence[:2000],  # Truncate to stay within limits
+    )
+
+    try:
+        resp = requests.post(
+            _ENDPOINT,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "sonar",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500,
+                "temperature": 0.3,
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        answer = ""
+        if data.get("choices"):
+            answer = data["choices"][0]["message"]["content"]
+
+        citations = _filter_citations(data.get("citations", []))
+        return {"answer": answer or None, "citations": citations, "error": None}
+
+    except Exception as exc:
+        logger.warning("Perplexity followup error: %s", exc)
+        return {"answer": None, "citations": [], "error": str(exc)}

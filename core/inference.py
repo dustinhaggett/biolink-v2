@@ -148,6 +148,67 @@ def disease_to_drugs(
     }
 
 
+def drug_to_diseases(
+    drug_input: str,
+    top_n: int = 20,
+    model: Optional[BioLinkModel] = None,
+    scaler: Optional[TemperatureScaler] = None,
+    drugs_list: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """
+    Reverse search: given a drug name, find the top diseases it may treat.
+
+    Returns dict with keys: query, drug_entity, display_name, clarification, results
+    """
+    if model is None:
+        model = _default_model()
+    if scaler is None:
+        scaler = _default_scaler()
+    if drugs_list is None:
+        drugs_list = model.drug_names
+
+    # Fuzzy match drug name against known drugs
+    from core.intent_mapper import map_drug
+    mapped = map_drug(drug_input, drugs_list)
+    drug_entity = mapped.get("drug_entity")
+    display_name = mapped.get("display_name") or ""
+    clarification = mapped.get("clarification")
+
+    if drug_entity is None:
+        return {
+            "query": drug_input,
+            "drug_entity": None,
+            "display_name": display_name,
+            "clarification": clarification or "Could you enter a more specific drug name?",
+            "results": [],
+        }
+
+    # Encode drug and score all diseases
+    drug_vec = model.encode_drug(str(drug_entity))
+    scored = model.score_all_diseases(drug_vec)
+    top = scored[: max(0, int(top_n))]
+
+    results: List[Dict[str, Any]] = []
+    for disease_name, logit in top:
+        proba = scaler.calibrated_proba(float(logit))
+        results.append(
+            {
+                "disease": disease_name,
+                "logit": float(logit),
+                "proba": float(proba),
+                "tier": confidence_tier(float(proba)),
+            }
+        )
+
+    return {
+        "query": drug_input,
+        "drug_entity": str(drug_entity),
+        "display_name": display_name or str(drug_entity),
+        "clarification": None,
+        "results": results,
+    }
+
+
 if __name__ == "__main__":
     # Smoke test: high-confidence path uses exact CTD name when API works;
     # otherwise intent mapper may return low confidence and empty results.
