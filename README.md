@@ -101,6 +101,15 @@ biolink-v2/
 └── requirements.txt
 ```
 
+## AI Tools Usage
+
+This project leverages AI tools extensively, as encouraged by the course guidelines:
+
+- **Claude Code (Anthropic)** — Primary development tool. Used for architecture design, code generation, debugging, feature implementation, and documentation. Claude Code accelerated development of all major features including the Perplexity integration, clinical trials finder, reverse search, PDF export, and UI components.
+- **Claude API (Haiku)** — Runtime component. Powers disease/drug entity resolution (intent mapping) and plain-English explanation generation within the app itself.
+- **Perplexity Sonar API** — Runtime component. Provides live evidence search grounding each drug-disease prediction in published literature, clinical trials, and mechanism-of-action data.
+- **GitHub Copilot** — Used for code completion during early development phases.
+
 ## Disclaimer
 
 BioLink is a hypothesis-generation tool for research purposes only. It is **not medical advice**. Always consult a qualified healthcare provider before considering any treatment.
