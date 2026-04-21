@@ -179,14 +179,17 @@ def main():
             filtered_for_export = filter_results(st.session_state.results, min_conf, fda_filters)
             render_export_button(filtered_for_export, st.session_state.disease_name)
             # PDF export
-            from ui.pdf_export import generate_pdf
-            pdf_bytes = generate_pdf(filtered_for_export, st.session_state.disease_name)
-            st.download_button(
-                label="Export PDF",
-                data=pdf_bytes,
-                file_name=f"biolink_{st.session_state.disease_name.replace(' ', '_')}.pdf",
-                mime="application/pdf",
-            )
+            try:
+                from ui.pdf_export import generate_pdf
+                pdf_bytes = generate_pdf(filtered_for_export, st.session_state.disease_name)
+                st.download_button(
+                    label="Export PDF",
+                    data=pdf_bytes,
+                    file_name=f"biolink_{st.session_state.disease_name.replace(' ', '_')}.pdf",
+                    mime="application/pdf",
+                )
+            except Exception:
+                pass  # PDF generation is optional, don't crash the app
 
     # ── Batch mode in sidebar ──
     if st.session_state.app_state == "idle":
