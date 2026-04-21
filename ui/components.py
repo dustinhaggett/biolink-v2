@@ -27,47 +27,81 @@ def render_disclaimer():
 # ── Search ────────────────────────────────────────────────────
 
 
-def render_search_section(all_diseases: list[str] | None = None):
+def render_search_section(
+    all_diseases: list[str] | None = None,
+    all_drugs: list[str] | None = None,
+):
     """Render the hero search section. Returns the submitted query or None."""
     st.markdown(
         '<div class="search-hero">'
         "<h1>Discover potential drug repurposing candidates "
         'using <span class="primary-text">knowledge graph AI</span></h1>'
-        '<p class="search-subtitle">Enter a disease to find ranked drug candidates '
-        "with calibrated confidence scores, FDA status, and evidence.</p>"
+        '<p class="search-subtitle">Search by disease to find drug candidates, '
+        "or by drug to find conditions it may treat.</p>"
         "</div>",
         unsafe_allow_html=True,
     )
 
+    # Search mode toggle
+    mode = st.radio(
+        "Search mode",
+        options=["disease", "drug"],
+        format_func=lambda x: "Search by Disease" if x == "disease" else "Search by Drug",
+        horizontal=True,
+        key="search_mode",
+        label_visibility="collapsed",
+    )
+
+    if mode == "disease":
+        placeholder = "Enter a disease (e.g., Alzheimer's Disease, Type 2 Diabetes)"
+    else:
+        placeholder = "Enter a drug (e.g., Metformin, Doxycycline, Aspirin)"
+
     col1, col2 = st.columns([5, 1])
     with col1:
         query = st.text_input(
-            "Disease search",
-            placeholder="Enter a disease (e.g., Alzheimer's Disease, Type 2 Diabetes)",
+            "Search",
+            placeholder=placeholder,
             label_visibility="collapsed",
             key="search_input",
         )
     with col2:
         search_clicked = st.button("Search", type="primary", use_container_width=True)
 
-    # Dropdown to browse all diseases
-    if all_diseases:
+    # Dropdown to browse
+    if mode == "disease" and all_diseases:
         def _on_dropdown_change():
             v = st.session_state.get("disease_dropdown", "")
             if v:
                 st.session_state.submit_query = v
-                # Reset dropdown so selecting the same disease again works
                 st.session_state.disease_dropdown = ""
 
-        st.markdown("**Or select a disease from dropdown**")
+        st.markdown("**Or select from dropdown**")
         st.selectbox(
-            "Or select a disease from dropdown",
+            "Select a disease",
             options=[""] + all_diseases,
             index=0,
             key="disease_dropdown",
             label_visibility="collapsed",
             on_change=_on_dropdown_change,
-            help="Select a disease from the full list of 2,500+ supported conditions",
+            help="Browse 2,500+ supported conditions",
+        )
+    elif mode == "drug" and all_drugs:
+        def _on_drug_dropdown_change():
+            v = st.session_state.get("drug_dropdown", "")
+            if v:
+                st.session_state.submit_query = v
+                st.session_state.drug_dropdown = ""
+
+        st.markdown("**Or select from dropdown**")
+        st.selectbox(
+            "Select a drug",
+            options=[""] + all_drugs,
+            index=0,
+            key="drug_dropdown",
+            label_visibility="collapsed",
+            on_change=_on_drug_dropdown_change,
+            help="Browse 7,000+ drugs in the database",
         )
 
     if search_clicked and query.strip():
@@ -133,9 +167,44 @@ def fda_badge_html(fda_status: str | None) -> str:
         return '<span class="fda-badge fda-unknown">Unknown</span>'
 
 
+# ── Evidence Quality Badge ────────────────────────────────────
+
+_QUALITY_CONFIG = {
+    "RCT": ("RCT", "#1b7a3d", "#e6f4ea"),
+    "Rct": ("RCT", "#1b7a3d", "#e6f4ea"),
+    "Human Study": ("Human Study", "#1a56db", "#e1effe"),
+    "Preclinical": ("Preclinical", "#b45309", "#fef3c7"),
+    "Case Report": ("Case Report", "#6b7280", "#f3f4f6"),
+    "Theoretical": ("Theoretical", "#9ca3af", "#f9fafb"),
+}
+
+
+def _evidence_quality_badge_html(quality: str) -> str:
+    label, color, bg = _QUALITY_CONFIG.get(quality, ("Unknown", "#9ca3af", "#f9fafb"))
+    return (
+        f'<span style="display:inline-block; padding:0.2rem 0.6rem; border-radius:999px; '
+        f'font-size:0.7rem; font-weight:600; color:{color}; background:{bg}; '
+        f'border:1px solid {color}22; margin-left:0.4rem;">{label}</span>'
+    )
+
+
+# ── Citation Formatter ───────────────────────────────────────
+
+def _format_citation_label(url: str) -> str:
+    from urllib.parse import urlparse
+    try:
+        domain = urlparse(url).netloc
+        if domain.startswith("www."):
+            domain = domain[4:]
+        path = urlparse(url).path.rstrip("/")
+        return domain + (path if len(path) < 40 else path[:37] + "...")
+    except Exception:
+        return url
+
+
 # ── Result Card ───────────────────────────────────────────────
 
-def render_result_card(result: dict, rank: int):
+def render_result_card(result: dict, rank: int, disease_name: str = ""):
     """Render a single drug result card."""
     tier = result.get("tier", "Speculative")
     tier_class = tier.lower()
@@ -165,20 +234,45 @@ def render_result_card(result: dict, rank: int):
         unsafe_allow_html=True,
     )
 
+    # Clinical trials
+    trials = result.get("clinical_trials", [])
+    if trials:
+        _render_clinical_trials(trials)
+
     # Evidence from Perplexity search
     evidence = result.get("evidence")
     if evidence and evidence.get("summary"):
-        # Verdict badge
+        # Verdict + evidence quality + TL;DR
         verdict = evidence.get("verdict", "insufficient")
         verdict_html = _verdict_badge_html(verdict)
+        quality = evidence.get("evidence_quality", "Unknown")
+        quality_html = _evidence_quality_badge_html(quality) if quality != "Unknown" else ""
         tldr = evidence.get("tldr")
 
-        # Show verdict + TL;DR inline
-        tldr_html = f'<span style="margin-left:0.5rem; font-size:0.9rem; color:#3e494a;">{tldr}</span>' if tldr else ""
+        # Interaction warning badge
+        interaction_html = ""
+        if evidence.get("has_interactions"):
+            interaction_html = (
+                '<span style="display:inline-block; padding:0.2rem 0.6rem; border-radius:999px; '
+                'font-size:0.7rem; font-weight:600; color:#c4320a; background:#fef2f2; '
+                'border:1px solid #c4320a22; margin-left:0.4rem;">Drug Interactions</span>'
+            )
+
+        tldr_html = f'<div style="margin-top:0.4rem; font-size:0.9rem; color:#3e494a;">{tldr}</div>' if tldr else ""
         st.markdown(
-            f'{verdict_html}{tldr_html}',
+            f'{verdict_html}{quality_html}{interaction_html}{tldr_html}',
             unsafe_allow_html=True,
         )
+
+        # Pathway chain
+        pathway = evidence.get("pathway")
+        if pathway:
+            st.markdown(
+                f'<div style="margin:0.5rem 0; padding:0.5rem 0.75rem; background:#f0f7f8; '
+                f'border-radius:0.5rem; font-size:0.85rem; color:#00606d; font-family:monospace;">'
+                f'{pathway}</div>',
+                unsafe_allow_html=True,
+            )
 
         with st.expander("View detailed evidence"):
             st.markdown(evidence["summary"])
@@ -186,27 +280,97 @@ def render_result_card(result: dict, rank: int):
             if citations:
                 st.markdown("**Sources:**")
                 for url in citations:
-                    # Show domain name instead of raw URL
-                    from urllib.parse import urlparse
-                    try:
-                        domain = urlparse(url).netloc
-                        if domain.startswith("www."):
-                            domain = domain[4:]
-                        # Trim path for display
-                        path = urlparse(url).path.rstrip("/")
-                        label = domain + (path if len(path) < 40 else path[:37] + "...")
-                    except Exception:
-                        label = url
+                    label = _format_citation_label(url)
                     st.markdown(f"- [{label}]({url})")
     elif explanation:
-        # Fallback to Claude explanation if no evidence search
         with st.expander("View explanation"):
             st.markdown(
                 f'<div class="explanation-text">{explanation}</div>',
                 unsafe_allow_html=True,
             )
 
+    # Ask about this result
+    _render_followup_input(drug, disease_name, evidence)
+
     st.markdown("</div>", unsafe_allow_html=True)
+
+
+# ── Clinical Trials Section ──────────────────────────────────
+
+_TRIAL_STATUS_COLORS = {
+    "RECRUITING": "#1b7a3d",
+    "ACTIVE_NOT_RECRUITING": "#b45309",
+    "COMPLETED": "#1a56db",
+    "TERMINATED": "#6b7280",
+    "WITHDRAWN": "#6b7280",
+}
+
+
+def _render_clinical_trials(trials: list[dict]):
+    """Render clinical trial links."""
+    st.markdown(
+        f'<div style="margin:0.3rem 0; font-size:0.85rem;">'
+        f'<strong>Clinical Trials:</strong> {len(trials)} found</div>',
+        unsafe_allow_html=True,
+    )
+    for trial in trials:
+        status = trial.get("status", "Unknown")
+        color = _TRIAL_STATUS_COLORS.get(status, "#6b7280")
+        status_display = status.replace("_", " ").title()
+        phase = f" | {trial['phase']}" if trial.get("phase") else ""
+        title = trial.get("title", "")
+        url = trial.get("url", "")
+        nct = trial.get("nct_id", "")
+        st.markdown(
+            f'<div style="font-size:0.8rem; margin-left:0.5rem; margin-bottom:0.3rem;">'
+            f'<a href="{url}" target="_blank" style="color:#00606d; text-decoration:none;">{nct}</a> '
+            f'<span style="color:{color}; font-weight:600;">{status_display}</span>{phase} '
+            f'— {title[:80]}{"..." if len(title) > 80 else ""}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+# ── Follow-up Question ──────────────────────────────────────
+
+def _render_followup_input(drug: str, disease_name: str, evidence: dict | None):
+    """Render ask-about-this-result input."""
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = {}
+
+    drug_key = f"followup_{drug}"
+    history = st.session_state.chat_history.get(drug, [])
+
+    # Show previous answer if exists
+    for entry in history:
+        if entry["role"] == "user":
+            st.markdown(f"**You asked:** {entry['content']}")
+        else:
+            st.markdown(entry["content"])
+            citations = entry.get("citations", [])
+            if citations:
+                for url in citations:
+                    label = _format_citation_label(url)
+                    st.markdown(f"- [{label}]({url})")
+
+    # Only allow one follow-up per card
+    if len(history) < 2:
+        question = st.text_input(
+            f"Ask about {drug}",
+            placeholder=f"Ask a question about {drug}...",
+            label_visibility="collapsed",
+            key=drug_key,
+        )
+        if question and question.strip():
+            from enrichment.perplexity import ask_followup
+            prior = evidence.get("summary", "") if evidence else ""
+            with st.spinner("Searching..."):
+                resp = ask_followup(drug, disease_name, question.strip(), prior)
+            if resp.get("answer"):
+                st.session_state.chat_history[drug] = [
+                    {"role": "user", "content": question.strip()},
+                    {"role": "assistant", "content": resp["answer"], "citations": resp.get("citations", [])},
+                ]
+                st.rerun()
 
 
 # ── Sidebar Filters ───────────────────────────────────────────
@@ -214,13 +378,6 @@ def render_result_card(result: dict, rank: int):
 def render_sidebar_filters():
     """Render sidebar filters. Returns (min_confidence, fda_filters)."""
     with st.sidebar:
-        st.markdown(
-            '<div style="margin-bottom:1.5rem;">'
-            '<span style="font-family:Manrope,sans-serif; font-weight:800; font-size:1.3rem; color:#00606d;">BioLink</span>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        st.markdown("---")
         st.markdown("### Filters")
 
         st.markdown("**Confidence Threshold**")
