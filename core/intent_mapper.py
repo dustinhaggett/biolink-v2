@@ -19,7 +19,12 @@ DEFAULT_DISEASES_PATH = "data/diseases_list.txt"
 SYSTEM_PROMPT = (
     "You are a biomedical entity resolver. Given a user's plain-English disease "
     "description, identify the single best matching disease entity from the "
-    "provided list of CTD disease names. Return JSON only."
+    "provided list of CTD disease names. Return JSON only.\n\n"
+    "Confidence guidelines:\n"
+    '- "high": exact or near-exact match found in the list\n'
+    '- "medium": reasonable match but some ambiguity\n'
+    '- "low": no good match found, clarification needed\n'
+    "Set clarification to null when confidence is high or medium."
 )
 
 
@@ -170,9 +175,18 @@ def map_disease(user_input: str, candidate_diseases: List[str]) -> Dict[str, Any
     try:
         if Anthropic is None:
             raise RuntimeError("anthropic package is not installed")
-        client = Anthropic()
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            try:
+                import streamlit as st
+                api_key = st.secrets.get("ANTHROPIC_API_KEY")
+            except Exception:
+                pass
+        if not api_key:
+            raise RuntimeError("ANTHROPIC_API_KEY is not set")
+        client = Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-haiku-4-5-20251001",
             system=SYSTEM_PROMPT,
             temperature=0,
             max_tokens=300,

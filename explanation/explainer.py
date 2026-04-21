@@ -96,12 +96,18 @@ def explain_prediction(
 
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
-            raise RuntimeError("ANTHROPIC_API_KEY is not set in environment")
+            try:
+                import streamlit as st
+                api_key = st.secrets.get("ANTHROPIC_API_KEY")
+            except Exception:
+                pass
+        if not api_key:
+            raise RuntimeError("ANTHROPIC_API_KEY is not set")
 
         client = Anthropic(api_key=api_key)
 
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-haiku-4-5-20251001",
             max_tokens=200,
             temperature=0.3,
             system=SYSTEM_PROMPT,

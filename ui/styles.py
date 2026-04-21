@@ -38,16 +38,20 @@ def inject_css():
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
         /* Global */
+        :root {
+            --primary-color: #00606d;
+        }
+
         .stApp {
             background-color: #f8fafb;
             font-family: 'Inter', sans-serif;
             color: #191c1d;
         }
 
-        /* Hide default Streamlit header/footer */
-        #MainMenu {visibility: hidden;}
+        /* Hide default Streamlit footer and top toolbar (Deploy button, menu) */
         footer {visibility: hidden;}
-        header {visibility: hidden;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
 
         /* Headlines use Manrope */
         h1, h2, h3 {
@@ -194,8 +198,8 @@ def inject_css():
         }
 
         .fda-unknown {
-            background-color: #f2f4f5;
-            color: #6e797a;
+            background-color: #e2e8f0;
+            color: #475569;
         }
 
         /* Explanation section */
@@ -227,13 +231,76 @@ def inject_css():
 
         /* Sidebar styling */
         [data-testid="stSidebar"] {
-            background-color: #eceeef;
+            background-color: #f8fafb;
         }
 
         [data-testid="stSidebar"] h1,
         [data-testid="stSidebar"] h2,
         [data-testid="stSidebar"] h3 {
             font-family: 'Manrope', sans-serif !important;
+            color: #191c1d !important;
+        }
+
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] .stMarkdown {
+            color: #191c1d !important;
+        }
+
+        /* Slider thumb */
+        .stSlider [role="slider"] {
+            background-color: #00606d !important;
+        }
+
+        /* Slider thumb value text */
+        .stSlider [data-testid="stThumbValue"] {
+            color: #00606d !important;
+        }
+
+        /* Slider track (unfilled portion) */
+        .stSlider div[data-baseweb="slider"] > div > div[role="progressbar"] {
+            background-color: #bdc9ca !important;
+        }
+
+        /* Slider filled track */
+        .stSlider div[data-baseweb="slider"] > div > div[role="progressbar"] > div {
+            background-color: #00606d !important;
+        }
+
+        /* Checkbox — force teal on all checkbox elements */
+        .stCheckbox label span[data-testid="stCheckboxLabel"] {
+            color: #191c1d !important;
+        }
+
+        /* Override the checkbox SVG/icon color */
+        .stCheckbox svg {
+            fill: #00606d !important;
+            color: #00606d !important;
+        }
+
+        .stCheckbox div[data-baseweb="checkbox"] span {
+            background-color: #00606d !important;
+            border-color: #00606d !important;
+        }
+
+        /* Unchecked state — keep white background */
+        .stCheckbox div[data-baseweb="checkbox"] input:not(:checked) + span {
+            background-color: #ffffff !important;
+            border-color: #bdc9ca !important;
+        }
+
+        /* Download button styling */
+        .stDownloadButton > button {
+            background-color: #00606d !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+        }
+
+        .stDownloadButton > button:hover {
+            background-color: #267987 !important;
         }
 
         /* Streamlit input styling overrides */
@@ -255,6 +322,21 @@ def inject_css():
             border: none;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
+        }
+
+        /* Secondary (non-primary) buttons — used for disease chips, etc. */
+        .stButton > button:not([kind="primary"]) {
+            background-color: #eceeef !important;
+            color: #191c1d !important;
+            border: 1px solid #bdc9ca !important;
+            border-radius: 1rem !important;
+            font-size: 0.8rem !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .stButton > button:not([kind="primary"]):hover {
+            background-color: #cde7ed !important;
+            border-color: #00606d !important;
         }
 
         /* Loading step */
