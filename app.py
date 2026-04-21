@@ -11,7 +11,7 @@ from pathlib import Path
 import streamlit as st
 
 st.set_page_config(
-    page_title="BioLink v2",
+    page_title="BioLink",
     page_icon="🧬",
     layout="wide",
 )
@@ -101,6 +101,14 @@ def run_explanations(results: list[dict], disease: str, top_n: int = 10) -> list
     return results
 
 
+def run_evidence_search(results: list[dict], disease: str, top_n: int = 5) -> list[dict]:
+    """Search Perplexity for evidence on the top N drug-disease pairs."""
+    from enrichment.perplexity import search_drug_disease
+    for r in results[:top_n]:
+        r["evidence"] = search_drug_disease(drug=r["drug"], disease=disease)
+    return results
+
+
 # ── Session State Init ────────────────────────────────────────
 
 if "app_state" not in st.session_state:
@@ -136,7 +144,7 @@ def main():
     if st.session_state.app_state in ("idle", "clarifying"):
 
         if st.session_state.app_state == "idle":
-            query = render_search_section()
+            query = render_search_section(all_diseases=load_diseases())
             if query:
                 _run_pipeline(query)
 
@@ -186,6 +194,10 @@ def _run_pipeline(query: str):
         # Step 3: Explanations (top 10)
         st.write("Generating plain-English explanations...")
         results = run_explanations(results, output["ctd_entity"], top_n=10)
+
+        # Step 4: Evidence search (top 5)
+        st.write("Searching for published evidence...")
+        results = run_evidence_search(results, output["ctd_entity"], top_n=5)
 
         status.update(label="Analysis complete", state="complete", expanded=False)
 

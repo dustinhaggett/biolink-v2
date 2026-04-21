@@ -16,7 +16,7 @@ import streamlit as st
 def render_disclaimer():
     st.markdown(
         '<div class="disclaimer-banner">'
-        "<strong>Not medical advice.</strong> BioLink v2 is a hypothesis-generation "
+        "<strong>Not medical advice.</strong> BioLink is a hypothesis-generation "
         "tool for research purposes only. Always consult a qualified physician "
         "before considering any treatment."
         "</div>",
@@ -26,16 +26,8 @@ def render_disclaimer():
 
 # ── Search ────────────────────────────────────────────────────
 
-EXAMPLE_DISEASES = [
-    "Alzheimer's Disease",
-    "Type 2 Diabetes",
-    "Parkinson's Disease",
-    "Multiple Sclerosis",
-    "Hypertension",
-]
 
-
-def render_search_section():
+def render_search_section(all_diseases: list[str] | None = None):
     """Render the hero search section. Returns the submitted query or None."""
     st.markdown(
         '<div class="search-hero">'
@@ -58,16 +50,25 @@ def render_search_section():
     with col2:
         search_clicked = st.button("Search", type="primary", use_container_width=True)
 
-    # Example disease chips
-    st.markdown('<div class="chip-container">', unsafe_allow_html=True)
-    chip_cols = st.columns(len(EXAMPLE_DISEASES))
-    for i, disease in enumerate(EXAMPLE_DISEASES):
-        with chip_cols[i]:
-            if st.button(disease, key=f"chip_{i}", use_container_width=True):
-                st.session_state.search_input = disease
-                st.session_state.submit_query = disease
-                st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
+    # Dropdown to browse all diseases
+    if all_diseases:
+        def _on_dropdown_change():
+            v = st.session_state.get("disease_dropdown", "")
+            if v:
+                st.session_state.submit_query = v
+                # Reset dropdown so selecting the same disease again works
+                st.session_state.disease_dropdown = ""
+
+        st.markdown("**Or select a disease from dropdown**")
+        st.selectbox(
+            "Or select a disease from dropdown",
+            options=[""] + all_diseases,
+            index=0,
+            key="disease_dropdown",
+            label_visibility="collapsed",
+            on_change=_on_dropdown_change,
+            help="Select a disease from the full list of 2,500+ supported conditions",
+        )
 
     if search_clicked and query.strip():
         return query.strip()
@@ -104,6 +105,23 @@ def confidence_badge_html(tier: str, proba: float) -> str:
     tier_lower = tier.lower()
     pct = f"{proba:.0%}"
     return f'<span class="badge badge-{tier_lower}">{pct} {tier}</span>'
+
+
+_VERDICT_CONFIG = {
+    "supports": ("Evidence Supports", "#1b7a3d", "#e6f4ea"),
+    "standard-of-care": ("Standard of Care", "#1a56db", "#e1effe"),
+    "conflicts": ("Evidence Conflicts", "#c4320a", "#fef2f2"),
+    "insufficient": ("Insufficient Evidence", "#6b7280", "#f3f4f6"),
+}
+
+
+def _verdict_badge_html(verdict: str) -> str:
+    label, color, bg = _VERDICT_CONFIG.get(verdict, _VERDICT_CONFIG["insufficient"])
+    return (
+        f'<span style="display:inline-block; padding:0.25rem 0.75rem; border-radius:999px; '
+        f'font-size:0.8rem; font-weight:600; color:{color}; background:{bg}; '
+        f'border:1px solid {color}22;">{label}</span>'
+    )
 
 
 def fda_badge_html(fda_status: str | None) -> str:
@@ -147,8 +165,41 @@ def render_result_card(result: dict, rank: int):
         unsafe_allow_html=True,
     )
 
-    # Expandable explanation
-    if explanation:
+    # Evidence from Perplexity search
+    evidence = result.get("evidence")
+    if evidence and evidence.get("summary"):
+        # Verdict badge
+        verdict = evidence.get("verdict", "insufficient")
+        verdict_html = _verdict_badge_html(verdict)
+        tldr = evidence.get("tldr")
+
+        # Show verdict + TL;DR inline
+        tldr_html = f'<span style="margin-left:0.5rem; font-size:0.9rem; color:#3e494a;">{tldr}</span>' if tldr else ""
+        st.markdown(
+            f'{verdict_html}{tldr_html}',
+            unsafe_allow_html=True,
+        )
+
+        with st.expander("View detailed evidence"):
+            st.markdown(evidence["summary"])
+            citations = evidence.get("citations", [])
+            if citations:
+                st.markdown("**Sources:**")
+                for url in citations:
+                    # Show domain name instead of raw URL
+                    from urllib.parse import urlparse
+                    try:
+                        domain = urlparse(url).netloc
+                        if domain.startswith("www."):
+                            domain = domain[4:]
+                        # Trim path for display
+                        path = urlparse(url).path.rstrip("/")
+                        label = domain + (path if len(path) < 40 else path[:37] + "...")
+                    except Exception:
+                        label = url
+                    st.markdown(f"- [{label}]({url})")
+    elif explanation:
+        # Fallback to Claude explanation if no evidence search
         with st.expander("View explanation"):
             st.markdown(
                 f'<div class="explanation-text">{explanation}</div>',
@@ -163,6 +214,13 @@ def render_result_card(result: dict, rank: int):
 def render_sidebar_filters():
     """Render sidebar filters. Returns (min_confidence, fda_filters)."""
     with st.sidebar:
+        st.markdown(
+            '<div style="margin-bottom:1.5rem;">'
+            '<span style="font-family:Manrope,sans-serif; font-weight:800; font-size:1.3rem; color:#00606d;">BioLink</span>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown("---")
         st.markdown("### Filters")
 
         st.markdown("**Confidence Threshold**")

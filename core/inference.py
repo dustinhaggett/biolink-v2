@@ -100,20 +100,24 @@ def disease_to_drugs(
             "results": [],
         }
 
-    # Low confidence: surface clarification and do not score yet
-    if confidence == "low":
-        msg = (
-            clarification.strip()
-            if isinstance(clarification, str) and clarification.strip()
-            else "I might have matched the wrong condition. Could you confirm or rephrase?"
-        )
-        return {
-            "query": user_input,
-            "ctd_entity": str(ctd_entity),
-            "display_name": display_name or str(ctd_entity),
-            "clarification": msg,
-            "results": [],
-        }
+    # Low confidence with no valid entity: surface clarification
+    if confidence == "low" and clarification:
+        # If the entity is valid (in the diseases list), proceed anyway
+        if ctd_entity and diseases_list and str(ctd_entity) in diseases_list:
+            pass  # Valid entity — skip clarification, proceed to scoring
+        else:
+            msg = (
+                clarification.strip()
+                if isinstance(clarification, str) and clarification.strip()
+                else "I might have matched the wrong condition. Could you confirm or rephrase?"
+            )
+            return {
+                "query": user_input,
+                "ctd_entity": str(ctd_entity),
+                "display_name": display_name or str(ctd_entity),
+                "clarification": msg,
+                "results": [],
+            }
 
     # 3–7: encode disease, score all drugs, calibrate, tier
     disease_vec = model.encode_disease(str(ctd_entity))
