@@ -100,32 +100,39 @@ def generate_pdf(results: list[dict], disease_name: str) -> bytes:
         pdf.set_font("Helvetica", "B", 12)
         pdf.cell(0, 10, "Detailed Evidence", new_x="LMARGIN", new_y="NEXT")
 
+        w = pdf.w - pdf.l_margin - pdf.r_margin  # usable width
+
         for r in top_with_evidence:
             evidence = r.get("evidence", {})
             pdf.ln(5)
+            pdf.set_x(pdf.l_margin)
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(0, 7, _safe_text(f"{r['drug']} ({r.get('proba', 0):.0%} {r.get('tier', '')})"), new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(w, 7, _safe_text(f"{r['drug']} ({r.get('proba', 0):.0%} {r.get('tier', '')})"), new_x="LMARGIN", new_y="NEXT")
 
             # TL;DR
             tldr = evidence.get("tldr")
             if tldr:
+                pdf.set_x(pdf.l_margin)
                 pdf.set_font("Helvetica", "I", 9)
-                pdf.multi_cell(0, 5, _safe_text(f"TL;DR: {tldr}"))
+                pdf.multi_cell(w, 5, _safe_text(f"TL;DR: {tldr}"))
 
             # Summary (truncated)
             summary = evidence.get("summary", "")
             if summary:
+                pdf.set_x(pdf.l_margin)
                 pdf.set_font("Helvetica", "", 8)
                 truncated = summary[:500] + ("..." if len(summary) > 500 else "")
-                pdf.multi_cell(0, 4, _safe_text(truncated))
+                pdf.multi_cell(w, 4, _safe_text(truncated))
 
             # Citations
             citations = evidence.get("citations", [])
             if citations:
                 pdf.set_font("Helvetica", "", 7)
-                pdf.cell(0, 5, "Sources:", new_x="LMARGIN", new_y="NEXT")
+                pdf.set_x(pdf.l_margin)
+                pdf.cell(w, 5, "Sources:", new_x="LMARGIN", new_y="NEXT")
                 for url in citations[:5]:
-                    pdf.cell(0, 4, f"  - {url}", new_x="LMARGIN", new_y="NEXT")
+                    pdf.set_x(pdf.l_margin)
+                    pdf.cell(w, 4, _safe_text(f"  - {url}"), new_x="LMARGIN", new_y="NEXT")
 
             pdf.ln(3)
 
