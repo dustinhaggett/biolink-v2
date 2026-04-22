@@ -1,3 +1,13 @@
+---
+title: BioLink v2
+emoji: 🧬
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 # BioLink
 
 Drug repurposing discovery tool powered by knowledge graph AI. Search by disease to find ranked drug candidates, or search by drug to find conditions it may treat.
