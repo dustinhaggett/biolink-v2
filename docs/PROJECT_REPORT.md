@@ -51,7 +51,7 @@ BioLink v2 is a full-stack web application that wraps a trained MLP classifier i
 3. **Model scoring** — The MLP scores all 7,163 drugs (or 2,525 diseases in reverse mode) and ranks them by calibrated probability
 4. **Enrichment** — Parallel async calls to PubMed, OpenFDA, and ClinicalTrials.gov add real-world evidence to each prediction
 5. **Evidence search** — Perplexity Sonar searches published literature for mechanism-of-action, clinical studies, and trial data
-6. **Presentation** — Results are displayed with confidence badges, verdict badges, evidence quality indicators, pathway chains, and interactive follow-up Q&A
+6. **Presentation** — Results are displayed with confidence badges, verdict badges, evidence quality indicators, and pathway chains
 
 ### 2.2 AI Model Details
 
@@ -179,7 +179,6 @@ The tool explicitly disclaims medical authority and positions itself as a hypoth
                     |   - Result cards  |
                     |   - Verdict badges|
                     |   - Compare mode  |
-                    |   - Follow-up Q&A |
                     |   - PDF/CSV export|
                     +-------------------+
                               |
@@ -214,11 +213,11 @@ biolink-v2/
 │   ├── pubmed.py               # PubMed E-utilities co-occurrence count
 │   ├── openfda.py              # FDA approval status lookup
 │   ├── clinicaltrials.py       # ClinicalTrials.gov v2 API trial finder
-│   └── perplexity.py           # Evidence search, verdict/quality/pathway parsing, follow-up Q&A
+│   └── perplexity.py           # Evidence search, verdict/quality/pathway parsing
 ├── explanation/
 │   └── explainer.py            # Claude Haiku plain-English explanations
 ├── ui/
-│   ├── components.py           # Result cards, badges, filters, search, compare, follow-up
+│   ├── components.py           # Result cards, badges, filters, search, compare
 │   ├── styles.py               # CSS injection (Manrope/Inter fonts, teal palette)
 │   └── pdf_export.py           # PDF report generator (fpdf2)
 ├── data/

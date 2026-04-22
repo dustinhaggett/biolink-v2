@@ -50,36 +50,46 @@ class BioLinkModel:
         self.model.to(self.device)
         self.model.eval()
 
-        # Load BioWordVec vectors (200-dim).
-        self.word_vectors = KeyedVectors.load_word2vec_format(str(biowordvec_path), binary=True)
-        self.embedding_dim = int(self.word_vectors.vector_size)
-        if self.embedding_dim != 200:
-            raise ValueError(f"Expected BioWordVec dim 200, got {self.embedding_dim}")
+        self.embedding_dim = 200
 
-        self.drug_names = self._load_drug_names(drugs_list_path)
-        # Pre-embed and cache all drugs for fast full ranking.
-        self.drug_embeddings = self._embed_texts(self.drug_names)
-        if self.drug_embeddings.shape != (7164, 200):
-            raise ValueError(
-                f"Expected cached drug matrix shape (7164, 200), got {self.drug_embeddings.shape}"
-            )
+        # Try loading cached embeddings first (avoids 13GB BioWordVec file).
+        data_dir = Path(drugs_list_path).parent
+        drug_cache = data_dir / "drug_embeddings.npy"
+        disease_cache = data_dir / "disease_embeddings.npy"
+        use_cache = drug_cache.exists()
 
-        # Pre-embed diseases for reverse search (drug -> diseases)
-        self.disease_names: List[str] = []
-        self.disease_embeddings: np.ndarray | None = None
-        if diseases_list_path:
-            diseases_path = Path(diseases_list_path)
-            if diseases_path.exists():
-                self.disease_names = [
-                    line.strip() for line in diseases_path.read_text(encoding="utf-8").splitlines() if line.strip()
-                ]
-                self.disease_embeddings = self._embed_texts(self.disease_names)
+        if use_cache:
+            self.word_vectors = None
+            self.drug_names = self._load_names(drugs_list_path)
+            self.drug_embeddings = np.load(str(drug_cache))
 
-    def _load_drug_names(self, drugs_list_path: str | Path) -> List[str]:
-        path = Path(drugs_list_path)
-        if not path.exists():
-            raise FileNotFoundError(f"Drugs list not found: {path}")
-        return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            self.disease_names: List[str] = []
+            self.disease_embeddings: np.ndarray | None = None
+            if diseases_list_path and disease_cache.exists():
+                self.disease_names = self._load_names(diseases_list_path)
+                self.disease_embeddings = np.load(str(disease_cache))
+        else:
+            # Full BioWordVec path (local development).
+            self.word_vectors = KeyedVectors.load_word2vec_format(str(biowordvec_path), binary=True)
+            if int(self.word_vectors.vector_size) != 200:
+                raise ValueError(f"Expected BioWordVec dim 200, got {self.word_vectors.vector_size}")
+
+            self.drug_names = self._load_names(drugs_list_path)
+            self.drug_embeddings = self._embed_texts(self.drug_names)
+
+            self.disease_names: List[str] = []
+            self.disease_embeddings: np.ndarray | None = None
+            if diseases_list_path:
+                diseases_path = Path(diseases_list_path)
+                if diseases_path.exists():
+                    self.disease_names = self._load_names(diseases_list_path)
+                    self.disease_embeddings = self._embed_texts(self.disease_names)
+
+    def _load_names(self, path: str | Path) -> List[str]:
+        p = Path(path)
+        if not p.exists():
+            raise FileNotFoundError(f"List file not found: {p}")
+        return [line.strip() for line in p.read_text(encoding="utf-8").splitlines() if line.strip()]
 
     def _tokenize(self, text: str) -> List[str]:
         if not isinstance(text, str):
@@ -97,11 +107,21 @@ class BioLinkModel:
         return np.vstack([self._encode_text(text) for text in texts]).astype(np.float32)
 
     def encode_disease(self, ctd_disease_name: str) -> np.ndarray:
-        # BioWordVec encode -> 200-dim vector
+        if self.word_vectors is None and self.disease_embeddings is not None:
+            try:
+                idx = self.disease_names.index(ctd_disease_name)
+                return self.disease_embeddings[idx]
+            except ValueError:
+                return np.zeros(self.embedding_dim, dtype=np.float32)
         return self._encode_text(ctd_disease_name)
 
     def encode_drug(self, drug_name: str) -> np.ndarray:
-        # BioWordVec encode -> 200-dim vector
+        if self.word_vectors is None:
+            try:
+                idx = self.drug_names.index(drug_name)
+                return self.drug_embeddings[idx]
+            except ValueError:
+                return np.zeros(self.embedding_dim, dtype=np.float32)
         return self._encode_text(drug_name)
 
     def feature_vector(self, drug_vec: np.ndarray, disease_vec: np.ndarray) -> np.ndarray:

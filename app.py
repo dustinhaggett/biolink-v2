@@ -140,8 +140,6 @@ if "clarification_question" not in st.session_state:
     st.session_state.clarification_question = ""
 if "compare_set" not in st.session_state:
     st.session_state.compare_set = set()
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = {}
 if "search_mode" not in st.session_state:
     st.session_state.search_mode = "disease"
 if "drug_name" not in st.session_state:
@@ -166,7 +164,6 @@ def main():
                 st.session_state.app_state = "idle"
                 st.session_state.results = None
                 st.session_state.compare_set = set()
-                st.session_state.chat_history = {}
                 st.rerun()
         st.markdown("---")
 

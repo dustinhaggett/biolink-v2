@@ -289,9 +289,6 @@ def render_result_card(result: dict, rank: int, disease_name: str = ""):
                 unsafe_allow_html=True,
             )
 
-    # Ask about this result
-    _render_followup_input(drug, disease_name, evidence)
-
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -328,49 +325,6 @@ def _render_clinical_trials(trials: list[dict]):
             f'— {title[:80]}{"..." if len(title) > 80 else ""}</div>',
             unsafe_allow_html=True,
         )
-
-
-# ── Follow-up Question ──────────────────────────────────────
-
-def _render_followup_input(drug: str, disease_name: str, evidence: dict | None):
-    """Render ask-about-this-result input."""
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = {}
-
-    drug_key = f"followup_{drug}"
-    history = st.session_state.chat_history.get(drug, [])
-
-    # Show previous answer if exists
-    for entry in history:
-        if entry["role"] == "user":
-            st.markdown(f"**You asked:** {entry['content']}")
-        else:
-            st.markdown(entry["content"])
-            citations = entry.get("citations", [])
-            if citations:
-                for url in citations:
-                    label = _format_citation_label(url)
-                    st.markdown(f"- [{label}]({url})")
-
-    # Only allow one follow-up per card
-    if len(history) < 2:
-        question = st.text_input(
-            f"Ask about {drug}",
-            placeholder=f"Ask a question about {drug}...",
-            label_visibility="collapsed",
-            key=drug_key,
-        )
-        if question and question.strip():
-            from enrichment.perplexity import ask_followup
-            prior = evidence.get("summary", "") if evidence else ""
-            with st.spinner("Searching..."):
-                resp = ask_followup(drug, disease_name, question.strip(), prior)
-            if resp.get("answer"):
-                st.session_state.chat_history[drug] = [
-                    {"role": "user", "content": question.strip()},
-                    {"role": "assistant", "content": resp["answer"], "citations": resp.get("citations", [])},
-                ]
-                st.rerun()
 
 
 # ── Sidebar Filters ───────────────────────────────────────────
