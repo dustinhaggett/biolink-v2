@@ -14,6 +14,7 @@ st.set_page_config(
     page_title="BioLink",
     page_icon="🧬",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 from ui.styles import inject_css
@@ -22,7 +23,7 @@ from ui.components import (
     render_search_section,
     render_clarification,
     render_result_card,
-    render_sidebar_filters,
+    render_inline_filters,
     render_export_button,
     filter_results,
     confidence_badge_html,
@@ -151,31 +152,24 @@ if "drug_name" not in st.session_state:
 def main():
     render_disclaimer()
 
-    # ── Sidebar ──
-    with st.sidebar:
-        st.markdown(
-            '<div style="margin-bottom:1.5rem;">'
-            '<span style="font-family:Manrope,sans-serif; font-weight:800; font-size:1.3rem; color:#00606d;">BioLink</span>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        if st.session_state.app_state != "idle":
-            if st.button("New Search", use_container_width=True, type="primary"):
-                st.session_state.app_state = "idle"
-                st.session_state.results = None
-                st.session_state.compare_set = set()
-                st.rerun()
-        st.markdown("---")
+    # ── Top bar: New Search button ──
+    if st.session_state.app_state != "idle":
+        if st.button("New Search", type="primary"):
+            st.session_state.app_state = "idle"
+            st.session_state.results = None
+            st.session_state.compare_set = set()
+            st.rerun()
 
+    # ── Filters & Export (inline, above results) ──
     min_conf = 0.0
     fda_filters = {"FDA Approved", "Not in FDA Database", "Unknown"}
     if st.session_state.results and st.session_state.app_state == "results":
-        min_conf, fda_filters = render_sidebar_filters()
-        with st.sidebar:
-            st.markdown("---")
-            filtered_for_export = filter_results(st.session_state.results, min_conf, fda_filters)
+        min_conf, fda_filters = render_inline_filters()
+        filtered_for_export = filter_results(st.session_state.results, min_conf, fda_filters)
+        col_csv, col_pdf, _ = st.columns([1, 1, 4])
+        with col_csv:
             render_export_button(filtered_for_export, st.session_state.disease_name)
-            # PDF export
+        with col_pdf:
             try:
                 from ui.pdf_export import generate_pdf
                 pdf_bytes = generate_pdf(filtered_for_export, st.session_state.disease_name)
@@ -186,16 +180,8 @@ def main():
                     mime="application/pdf",
                 )
             except Exception:
-                pass  # PDF generation is optional, don't crash the app
-
-    # ── Batch mode in sidebar ──
-    if st.session_state.app_state == "idle":
-        with st.sidebar:
-            with st.expander("Batch Mode"):
-                st.markdown("Upload a CSV with a `disease` column to run predictions for multiple diseases at once.")
-                uploaded = st.file_uploader("Upload CSV", type=["csv"], key="batch_upload")
-                if uploaded and st.button("Run Batch", type="primary"):
-                    _run_batch(uploaded)
+                pass
+        st.markdown("---")
 
     # ── Idle State: Search ──
     if st.session_state.app_state in ("idle", "clarifying"):
@@ -210,6 +196,13 @@ def main():
                     _run_reverse_pipeline(query)
                 else:
                     _run_pipeline(query)
+
+            # Batch mode
+            with st.expander("Batch Mode"):
+                st.markdown("Upload a CSV with a `disease` column to run predictions for multiple diseases at once.")
+                uploaded = st.file_uploader("Upload CSV", type=["csv"], key="batch_upload")
+                if uploaded and st.button("Run Batch", type="primary"):
+                    _run_batch(uploaded)
 
         elif st.session_state.app_state == "clarifying":
             st.markdown(
