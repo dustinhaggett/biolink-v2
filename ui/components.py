@@ -360,6 +360,37 @@ def render_sidebar_filters():
         return min_conf / 100.0, fda_filters
 
 
+def render_inline_filters():
+    """Render filters inline in main content area. Returns (min_confidence, fda_filters)."""
+    col_slider, col_fda1, col_fda2, col_fda3 = st.columns([3, 1, 1, 1])
+
+    with col_slider:
+        min_conf = st.slider(
+            "Confidence Threshold",
+            min_value=0,
+            max_value=100,
+            value=0,
+            format="%d%%",
+        )
+
+    with col_fda1:
+        show_approved = st.checkbox("FDA Approved", value=True)
+    with col_fda2:
+        show_not_found = st.checkbox("Not in FDA DB", value=True)
+    with col_fda3:
+        show_unknown = st.checkbox("Unknown", value=True)
+
+    fda_filters = set()
+    if show_approved:
+        fda_filters.add("FDA Approved")
+    if show_not_found:
+        fda_filters.add("Not in FDA Database")
+    if show_unknown:
+        fda_filters.add("Unknown")
+
+    return min_conf / 100.0, fda_filters
+
+
 def filter_results(results: list[dict], min_conf: float, fda_filters: set) -> list[dict]:
     """Apply confidence and FDA filters to results."""
     filtered = []
