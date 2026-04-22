@@ -8,8 +8,8 @@ __pycache__/
 data/BioWordVec_PubMed_MIMICIII_d200.vec.bin
 data/CTD_chemicals_diseases.tsv.gz
 
-# Model weights
-models/*.pt
+# Model weights (tracked via LFS for deployment)
+# models/*.pt
 
 # Validation artifacts (reproducible via scripts/)
 data/val_logits.npy
