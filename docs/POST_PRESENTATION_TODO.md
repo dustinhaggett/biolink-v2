@@ -13,6 +13,7 @@ Captured during pre-presentation review (2026-04-30), revised post-presentation 
 **2026-05-01 second session (Days 4-7):**
 - ⚠️ **Hard-negative retraining done but reveals a deeper finding** (see "Hard-negative trade-off" section below). Implemented [scripts/retrain_with_hard_negatives.py](../scripts/retrain_with_hard_negatives.py). Trained 3 variants (100% hard, 50/50 mix, 25/75 mix). Each variant fixes some failures but degrades some wins. **No mix is unambiguously better.**
 - ⚠️ **Decision: do NOT ship retrained model as production yet.** The Perplexity-judge work (Days 8-9) is the better mechanism for safety re-ranking. Hard negatives can complement but don't replace it.
+- ✅ **Days 8-9 — Harm-aware reranking done.** Added `HARM_FOR_INDICATION: HARMFUL/NOT_HARMFUL/UNKNOWN` to Perplexity's structured output ([enrichment/perplexity.py](../enrichment/perplexity.py)). Built [core/reranking.py](../core/reranking.py) — pure function, harm-only, never demotes on absence of evidence. Wired into [app.py](../app.py) `_run_pipeline`. **21 new reranking tests, all pass.** Locks in the discovery-vs-harm invariants (e.g., `test_insufficient_evidence_unknown_harm_is_unchanged`).
 
 ## Guiding principle: discovery vs. harm
 
@@ -272,7 +273,8 @@ Before AND after every fix, run all 12 queries below and document top 20 + verdi
 | ~~1~~ ✅ | Lock regression test suite — runner + baseline JSON saved | Done 2026-05-01 | No |
 | ~~2-3~~ ✅ | Baselines (popularity, cosine, random) on all 2526 diseases | Done 2026-05-01 — popularity at 0.88, MLP +6.7pts | No |
 | ~~4-7~~ ⚠️ | Hard-negative retraining (3 variants tried) | Done 2026-05-01 — found irreducible trade-off, NOT shipping. See "Hard-negative trade-off" section. | No (per finding) |
-| **8-9** | Structured Perplexity judge for harm + UI tier counts | Re-run regression. Verify naltrexone-fibro preserved. Tier breakdown header visible | **Yes — Day 9** (inference.py + ui/ changes) |
+| ~~8-9 (judge)~~ ✅ | Structured Perplexity judge for harm | Done 2026-05-01 — `HARM_FOR_INDICATION` field added; harm-only re-ranking in core/reranking.py; 21 tests | Pending UI tier counts before deploy |
+| **8-9 (UI)** | UI tier counts above results + "show more" affordance | Manual UI test in Streamlit | **Yes — bundle with reranking deploy** |
 | **10** | Discovery boost for UNKNOWN verdict + active trials + "show more" affordance | Naltrexone-fibro should move up; user can browse beyond top 20 | **Yes — Day 10** (inference.py + app.py changes) |
 | ~~11~~ ✅ | Inference-prior recalibration (score spread fix) | Done 2026-05-01 — moved up because impact was bigger than expected | Pending deploy with next wave |
 | **12-14** | Write up — paper limitations explicit, not hidden | — | Final deploy + tag release |
