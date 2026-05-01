@@ -1,0 +1,1812 @@
+{
+  "metadata": {
+    "label": "after-hardneg-50",
+    "timestamp": "2026-05-01T10:06:11",
+    "git_commit": "e2a173698b19",
+    "weights": "models/biolink_v2_hardneg-50.pt",
+    "temperature_path": "data/temperature_hardneg-50.json",
+    "temperature_T": 1.32461743928526,
+    "prior_shift": 4.59511985013459,
+    "top_n": 20,
+    "n_drugs": 7164,
+    "n_diseases": 2526
+  },
+  "test_cases": {
+    "Fibromyalgia": {
+      "category": "win",
+      "expectations": [
+        "Pregabalin in top 5 (Lyrica \u2014 epilepsy drug, FDA-approved for fibro)",
+        "Milnacipran in top 5 (Savella \u2014 antidepressant, FDA-approved for fibro)",
+        "Duloxetine in top 10 (Cymbalta \u2014 antidepressant, FDA-approved for fibro)",
+        "Naltrexone in top 10 (emerging discovery candidate \u2014 opioid antagonist)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Pregabalin",
+          "logit": 5.273961544036865,
+          "proba": 0.35123342399754504,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "Gabapentin",
+          "logit": 4.9597344398498535,
+          "proba": 0.29925605316146614,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 3,
+          "drug": "Amitriptyline",
+          "logit": 3.5473828315734863,
+          "proba": 0.12818792150616307,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 4,
+          "drug": "Doxepin",
+          "logit": 3.424132823944092,
+          "proba": 0.11814423434253987,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 5,
+          "drug": "nabilone",
+          "logit": 3.2956151962280273,
+          "proba": 0.10840432562332608,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 6,
+          "drug": "cyclobenzaprine",
+          "logit": 3.2565155029296875,
+          "proba": 0.10558415716087588,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 7,
+          "drug": "Hesperidin",
+          "logit": 3.2244882583618164,
+          "proba": 0.10332251225540504,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 8,
+          "drug": "Nortriptyline",
+          "logit": 3.059154748916626,
+          "proba": 0.09231782778773176,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 9,
+          "drug": "Orphenadrine",
+          "logit": 3.037903308868408,
+          "proba": 0.09098222685643653,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 10,
+          "drug": "Mirtazapine",
+          "logit": 3.033496856689453,
+          "proba": 0.09070747754266743,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 11,
+          "drug": "Fluspirilene",
+          "logit": 2.9039413928985596,
+          "proba": 0.0829569209885589,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 12,
+          "drug": "Duloxetine Hydrochloride",
+          "logit": 2.811135768890381,
+          "proba": 0.07778030617743086,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 13,
+          "drug": "cannabidivarin",
+          "logit": 2.784123420715332,
+          "proba": 0.07633007359453464,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 14,
+          "drug": "Cannabinoids",
+          "logit": 2.7238361835479736,
+          "proba": 0.07318247527712969,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 15,
+          "drug": "Dehydroepiandrosterone",
+          "logit": 2.6580731868743896,
+          "proba": 0.06988563039490506,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 16,
+          "drug": "Fluphenazine",
+          "logit": 2.638077735900879,
+          "proba": 0.06891076162598216,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 17,
+          "drug": "Clonazepam",
+          "logit": 2.5831642150878906,
+          "proba": 0.0662979192497688,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 18,
+          "drug": "Mianserin",
+          "logit": 2.518446683883667,
+          "proba": 0.06333684890934717,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 19,
+          "drug": "coenzyme Q10",
+          "logit": 2.5011987686157227,
+          "proba": 0.06256874919457167,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 20,
+          "drug": "Milnacipran",
+          "logit": 2.463238477706909,
+          "proba": 0.06090879439208082,
+          "tier": "Speculative"
+        }
+      ]
+    },
+    "Dermatitis": {
+      "category": "win",
+      "expectations": [
+        "Pimecrolimus in top 5 (Elidel \u2014 calcineurin inhibitor)",
+        "Tacrolimus in top 10 (Protopic \u2014 transplant rejection drug)",
+        "Cyclosporine in top 10 (transplant rejection drug, systemic for severe AD)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Resveratrol",
+          "logit": 5.9883713722229,
+          "proba": 0.48143628450503084,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "baicalin",
+          "logit": 5.208856582641602,
+          "proba": 0.34011720266512185,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Pentoxifylline",
+          "logit": 5.170299053192139,
+          "proba": 0.3336149008493026,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "pranlukast",
+          "logit": 5.038903713226318,
+          "proba": 0.31193782219345995,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "dexpanthenol",
+          "logit": 4.937867641448975,
+          "proba": 0.2958058046304087,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 6,
+          "drug": "zileuton",
+          "logit": 4.927347660064697,
+          "proba": 0.2941541560971625,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 7,
+          "drug": "salvianolic acid",
+          "logit": 4.721913814544678,
+          "proba": 0.2630100363646883,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 8,
+          "drug": "naringin",
+          "logit": 4.705546855926514,
+          "proba": 0.26062202692486647,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 9,
+          "drug": "troxerutin",
+          "logit": 4.691041469573975,
+          "proba": 0.2585173996852862,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 10,
+          "drug": "Methylprednisolone",
+          "logit": 4.564976215362549,
+          "proba": 0.24069741411994275,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 11,
+          "drug": "naringenin",
+          "logit": 4.562315464019775,
+          "proba": 0.24033049205284726,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 12,
+          "drug": "Rosmarinic Acid",
+          "logit": 4.475189208984375,
+          "proba": 0.22852774042560242,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 13,
+          "drug": "genipin",
+          "logit": 4.4595465660095215,
+          "proba": 0.22645242644588948,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 14,
+          "drug": "Lutein",
+          "logit": 4.454282283782959,
+          "proba": 0.2257570175316067,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 15,
+          "drug": "Quercetin",
+          "logit": 4.410090923309326,
+          "proba": 0.2199791157725627,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 16,
+          "drug": "Rutin",
+          "logit": 4.405886173248291,
+          "proba": 0.2194349249995882,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 17,
+          "drug": "Berberine",
+          "logit": 4.378584384918213,
+          "proba": 0.2159250146378134,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 18,
+          "drug": "Luteolin",
+          "logit": 4.371016979217529,
+          "proba": 0.2149593825590602,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 19,
+          "drug": "astragalin",
+          "logit": 4.36293363571167,
+          "proba": 0.21393138286582683,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 20,
+          "drug": "montelukast",
+          "logit": 4.3613715171813965,
+          "proba": 0.21373313344243486,
+          "tier": "Moderate"
+        }
+      ]
+    },
+    "Migraine Disorders": {
+      "category": "win",
+      "expectations": [
+        "Topiramate in top 3 (epilepsy drug)",
+        "Amitriptyline in top 10 (tricyclic antidepressant)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "etazepine",
+          "logit": 5.644957065582275,
+          "proba": 0.41737844943668007,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "Flunarizine",
+          "logit": 5.403853893280029,
+          "proba": 0.37389064502803687,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Gabapentin",
+          "logit": 5.053340435028076,
+          "proba": 0.3142818383340343,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "Cinnarizine",
+          "logit": 4.935360431671143,
+          "proba": 0.29541168198653345,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 5,
+          "drug": "idebenone",
+          "logit": 4.67721700668335,
+          "proba": 0.2565219009544068,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 6,
+          "drug": "Tiapride Hydrochloride",
+          "logit": 4.636133670806885,
+          "proba": 0.25065152329327534,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 7,
+          "drug": "coenzyme Q10",
+          "logit": 4.629340648651123,
+          "proba": 0.24968953276067976,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 8,
+          "drug": "Venlafaxine Hydrochloride",
+          "logit": 4.621828556060791,
+          "proba": 0.24862858358583081,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 9,
+          "drug": "Trazodone",
+          "logit": 4.578358173370361,
+          "proba": 0.24254860400113903,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 10,
+          "drug": "Cannabidiol",
+          "logit": 4.550421714782715,
+          "proba": 0.2386950033164978,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 11,
+          "drug": "Resveratrol",
+          "logit": 4.535350322723389,
+          "proba": 0.23663356213700984,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 12,
+          "drug": "Carnosine",
+          "logit": 4.529069900512695,
+          "proba": 0.2357781705058837,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 13,
+          "drug": "Nicergoline",
+          "logit": 4.521124362945557,
+          "proba": 0.2346990578616702,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 14,
+          "drug": "Pregabalin",
+          "logit": 4.516908645629883,
+          "proba": 0.2341278979712959,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 15,
+          "drug": "alpha-Tocopherol",
+          "logit": 4.485231876373291,
+          "proba": 0.22986714119770757,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 16,
+          "drug": "Zonisamide",
+          "logit": 4.378556728363037,
+          "proba": 0.2159214798317068,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 17,
+          "drug": "oxiracetam",
+          "logit": 4.327950954437256,
+          "proba": 0.20952376658213662,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 18,
+          "drug": "Duloxetine Hydrochloride",
+          "logit": 4.324695587158203,
+          "proba": 0.20911702226230036,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 19,
+          "drug": "CGS 35066",
+          "logit": 4.312428951263428,
+          "proba": 0.2075895785048849,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 20,
+          "drug": "Mirtazapine",
+          "logit": 4.29627799987793,
+          "proba": 0.20559104076511417,
+          "tier": "Moderate"
+        }
+      ]
+    },
+    "Arthritis, Rheumatoid": {
+      "category": "win",
+      "expectations": [
+        "Methotrexate in top 5 (first-line DMARD)",
+        "Sulfasalazine, Hydroxychloroquine in top 10 (DMARDs)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Leflunomide",
+          "logit": 8.433377265930176,
+          "proba": 0.8546480113177728,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "bucillamine",
+          "logit": 8.212733268737793,
+          "proba": 0.8327104065828723,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Resveratrol",
+          "logit": 8.20837116241455,
+          "proba": 0.8322511616222543,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "Prednisone",
+          "logit": 7.703415393829346,
+          "proba": 0.7721440796404982,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "Sulfasalazine",
+          "logit": 7.577296733856201,
+          "proba": 0.7549605501560714,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "Prednisolone",
+          "logit": 7.383002281188965,
+          "proba": 0.7268237071138565,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "Methylprednisolone",
+          "logit": 7.3805155754089355,
+          "proba": 0.7264508084146004,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "pirprofen",
+          "logit": 7.328988552093506,
+          "proba": 0.7186529819681933,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "Pentoxifylline",
+          "logit": 7.307301998138428,
+          "proba": 0.7153309075520068,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "Acetylcysteine",
+          "logit": 7.279843807220459,
+          "proba": 0.7110910037234145,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "diacerein",
+          "logit": 7.062394618988037,
+          "proba": 0.6762363075313069,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "tofacitinib",
+          "logit": 6.9026408195495605,
+          "proba": 0.6492911757339664,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "Auranofin",
+          "logit": 6.8798089027404785,
+          "proba": 0.6453561614063168,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "Methotrexate",
+          "logit": 6.873629093170166,
+          "proba": 0.644287671737996,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "Arthrotec",
+          "logit": 6.755969524383545,
+          "proba": 0.6236800216863505,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "Etodolac",
+          "logit": 6.693375587463379,
+          "proba": 0.6125261595132334,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "Hydroxychloroquine",
+          "logit": 6.604925632476807,
+          "proba": 0.5965641649013842,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "Phenylbutazone",
+          "logit": 6.503406524658203,
+          "proba": 0.5779903587753703,
+          "tier": "Strong"
+        },
+        {
+          "rank": 19,
+          "drug": "Fluticasone",
+          "logit": 6.444026470184326,
+          "proba": 0.5670194870294399,
+          "tier": "Strong"
+        },
+        {
+          "rank": 20,
+          "drug": "lupulon",
+          "logit": 6.433995723724365,
+          "proba": 0.5651594246540476,
+          "tier": "Strong"
+        }
+      ]
+    },
+    "Tuberculosis": {
+      "category": "win",
+      "expectations": [
+        "Isoniazid, Rifampin, Ethambutol, Pyrazinamide in top 10 (first-line RIPE)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Ethambutol",
+          "logit": 13.706557273864746,
+          "proba": 0.9968350223146104,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "Isoniazid",
+          "logit": 13.485123634338379,
+          "proba": 0.996261298764621,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Rifampin",
+          "logit": 12.71547794342041,
+          "proba": 0.9933352703618359,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "Rifabutin",
+          "logit": 12.525750160217285,
+          "proba": 0.992316803308028,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "Pyrazinamide",
+          "logit": 10.658177375793457,
+          "proba": 0.9692642483747888,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "Ethionamide",
+          "logit": 10.429558753967285,
+          "proba": 0.9636844738391931,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "Capreomycin",
+          "logit": 9.872611045837402,
+          "proba": 0.9457337848688742,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "Streptomycin",
+          "logit": 9.749464988708496,
+          "proba": 0.9407600524776318,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "isoniazid, pyrazinamide, rifampin drug combination",
+          "logit": 8.30492877960205,
+          "proba": 0.8421829926383423,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "Clofazimine",
+          "logit": 8.284628868103027,
+          "proba": 0.8401354222901115,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "Kanamycin",
+          "logit": 7.975550174713135,
+          "proba": 0.8062619530708802,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "Amikacin",
+          "logit": 7.813411235809326,
+          "proba": 0.7864229960584255,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "Clarithromycin",
+          "logit": 7.531609058380127,
+          "proba": 0.7485238769252767,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "Cycloserine",
+          "logit": 7.325334548950195,
+          "proba": 0.7180948951690749,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "Ofloxacin",
+          "logit": 7.16308069229126,
+          "proba": 0.6926505225911932,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "Viomycin",
+          "logit": 6.9041643142700195,
+          "proba": 0.6495530314549778,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "Azithromycin",
+          "logit": 6.892375469207764,
+          "proba": 0.6475244461699919,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "Pentamidine",
+          "logit": 6.761801719665527,
+          "proba": 0.6247128391259733,
+          "tier": "Strong"
+        },
+        {
+          "rank": 19,
+          "drug": "Pyrimethamine",
+          "logit": 6.291480541229248,
+          "proba": 0.5385579671452678,
+          "tier": "Strong"
+        },
+        {
+          "rank": 20,
+          "drug": "bedaquiline",
+          "logit": 6.158061504364014,
+          "proba": 0.513450754455453,
+          "tier": "Strong"
+        }
+      ]
+    },
+    "Asthma": {
+      "category": "win",
+      "expectations": [
+        "Leukotriene antagonists (Montelukast, Pranlukast, Zafirlukast) in top 5",
+        "Inhaled corticosteroids (Budesonide, Fluticasone, Beclomethasone) in top 10"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "montelukast",
+          "logit": 8.399556159973145,
+          "proba": 0.8514474046883617,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "Fluticasone",
+          "logit": 7.356825351715088,
+          "proba": 0.7228824278006348,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Theophylline",
+          "logit": 7.341829776763916,
+          "proba": 0.7206089175040018,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "pranlukast",
+          "logit": 7.2128005027771,
+          "proba": 0.7005829455080078,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "Resveratrol",
+          "logit": 7.1693501472473145,
+          "proba": 0.6936571977106706,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "zileuton",
+          "logit": 6.803840160369873,
+          "proba": 0.6321233551697538,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "Salmeterol Xinafoate",
+          "logit": 6.794890880584717,
+          "proba": 0.6305508652868903,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "azelastine",
+          "logit": 6.7625250816345215,
+          "proba": 0.6248408596954184,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "zafirlukast",
+          "logit": 6.730222702026367,
+          "proba": 0.6191072042137384,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "flunisolide",
+          "logit": 6.726500988006592,
+          "proba": 0.6184444290567498,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "Cilomilast",
+          "logit": 6.66710901260376,
+          "proba": 0.6078094852400977,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "Roflumilast",
+          "logit": 6.633874893188477,
+          "proba": 0.6018127933254158,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "Aminophylline",
+          "logit": 6.615538120269775,
+          "proba": 0.5984908919183533,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "baicalin",
+          "logit": 6.354968547821045,
+          "proba": 0.5504447955897149,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "arctigenin",
+          "logit": 6.284465312957764,
+          "proba": 0.5372415648693677,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "Beclomethasone",
+          "logit": 6.257815361022949,
+          "proba": 0.5322361420013612,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "Albuterol",
+          "logit": 6.196379661560059,
+          "proba": 0.5206741354659822,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "Procaterol",
+          "logit": 5.9921650886535645,
+          "proba": 0.48215133734341215,
+          "tier": "Strong"
+        },
+        {
+          "rank": 19,
+          "drug": "azatadine",
+          "logit": 5.944696426391602,
+          "proba": 0.473210491215496,
+          "tier": "Strong"
+        },
+        {
+          "rank": 20,
+          "drug": "Acetylcysteine",
+          "logit": 5.9254631996154785,
+          "proba": 0.4695924239239354,
+          "tier": "Strong"
+        }
+      ]
+    },
+    "Lyme Disease": {
+      "category": "failure",
+      "expectations": [
+        "Cyclosporine should drop OUT of top 10 (currently #1, immunosuppressant for bacterial infection)",
+        "Methylprednisolone should drop (currently #2)",
+        "Doxycycline, Azithromycin, Ceftriaxone should rise toward top 5"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Rifampin",
+          "logit": 4.302741527557373,
+          "proba": 0.20638912907213472,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 2,
+          "drug": "Fluconazole",
+          "logit": 3.872476816177368,
+          "proba": 0.15820408066920177,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 3,
+          "drug": "Doxycycline",
+          "logit": 3.871352195739746,
+          "proba": 0.15809104540207164,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 4,
+          "drug": "Prednisone",
+          "logit": 3.857107162475586,
+          "proba": 0.15666495422089194,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 5,
+          "drug": "Caspofungin",
+          "logit": 3.6050424575805664,
+          "proba": 0.1331318032683689,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 6,
+          "drug": "Methylprednisolone",
+          "logit": 3.5279288291931152,
+          "proba": 0.12655556259626885,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 7,
+          "drug": "Azithromycin",
+          "logit": 3.5181148052215576,
+          "proba": 0.12573884628970627,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 8,
+          "drug": "Allopurinol",
+          "logit": 3.2268667221069336,
+          "proba": 0.10348898633359832,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 9,
+          "drug": "Dapsone",
+          "logit": 3.0737595558166504,
+          "proba": 0.09324588950114336,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 10,
+          "drug": "Minocycline",
+          "logit": 2.9812114238739014,
+          "proba": 0.08750400332978163,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 11,
+          "drug": "Prednisolone",
+          "logit": 2.9665284156799316,
+          "proba": 0.08662295893204273,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 12,
+          "drug": "Acetylcysteine",
+          "logit": 2.9209604263305664,
+          "proba": 0.08393960548990627,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 13,
+          "drug": "Hydroxychloroquine",
+          "logit": 2.9148318767547607,
+          "proba": 0.08358452869335384,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 14,
+          "drug": "Ceftriaxone",
+          "logit": 2.891376256942749,
+          "proba": 0.08223813242750301,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 15,
+          "drug": "Voriconazole",
+          "logit": 2.8806772232055664,
+          "proba": 0.08163056845450231,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 16,
+          "drug": "Vancomycin",
+          "logit": 2.818113327026367,
+          "proba": 0.07815899545913742,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 17,
+          "drug": "Cyclosporine",
+          "logit": 2.772488594055176,
+          "proba": 0.07571310081642406,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 18,
+          "drug": "posaconazole",
+          "logit": 2.644049644470215,
+          "proba": 0.0692005928589898,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 19,
+          "drug": "Itraconazole",
+          "logit": 2.633965492248535,
+          "proba": 0.06871183837485269,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 20,
+          "drug": "Clindamycin",
+          "logit": 2.6295688152313232,
+          "proba": 0.06849974452056526,
+          "tier": "Speculative"
+        }
+      ]
+    },
+    "Diabetes Mellitus, Type 2": {
+      "category": "failure",
+      "expectations": [
+        "Streptozocin should drop OUT of top 20 (currently #10 \u2014 INDUCES diabetes in research)",
+        "Nicotine should drop OUT of top 20 (currently #19 \u2014 increases diabetes risk)",
+        "Metformin, GLP-1 agonists, sulfonylureas should remain visible"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Resveratrol",
+          "logit": 8.662220001220703,
+          "proba": 0.8748229920036935,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "digalloylresveratrol",
+          "logit": 7.963717937469482,
+          "proba": 0.804862835152493,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Luteolin",
+          "logit": 7.770778179168701,
+          "proba": 0.7809672894722319,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "epigallocatechin gallate",
+          "logit": 7.716641426086426,
+          "proba": 0.7738960052651255,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "kaempferol",
+          "logit": 7.620513916015625,
+          "proba": 0.7609459112434256,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "Catechin",
+          "logit": 7.347026348114014,
+          "proba": 0.7213980725504768,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "naringenin",
+          "logit": 7.247768402099609,
+          "proba": 0.7060909783637914,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "proanthocyanidin",
+          "logit": 7.190785884857178,
+          "proba": 0.6970851297057657,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "Valsartan",
+          "logit": 7.051265716552734,
+          "proba": 0.6743941385764688,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "3-hydroxyflavone",
+          "logit": 6.960331439971924,
+          "proba": 0.6591430323552071,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "Rutin",
+          "logit": 6.8851318359375,
+          "proba": 0.6462753364866534,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "saxagliptin",
+          "logit": 6.845957279205322,
+          "proba": 0.6394856834315096,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "myricetin",
+          "logit": 6.8325042724609375,
+          "proba": 0.6371409462574978,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "epicatechin gallate",
+          "logit": 6.796293258666992,
+          "proba": 0.6307974631815768,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "Linagliptin",
+          "logit": 6.724399566650391,
+          "proba": 0.6180700059209012,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "cyanidin-3-O-beta-glucopyranoside",
+          "logit": 6.720007419586182,
+          "proba": 0.6172869775484496,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "matairesinol",
+          "logit": 6.688676357269287,
+          "proba": 0.611683841227881,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "Quercetin",
+          "logit": 6.666426181793213,
+          "proba": 0.6076865967164665,
+          "tier": "Strong"
+        },
+        {
+          "rank": 19,
+          "drug": "isoquercitrin",
+          "logit": 6.633413791656494,
+          "proba": 0.601729373322112,
+          "tier": "Strong"
+        },
+        {
+          "rank": 20,
+          "drug": "cyanidin",
+          "logit": 6.566234111785889,
+          "proba": 0.5895147560146786,
+          "tier": "Strong"
+        }
+      ]
+    },
+    "Alcoholism": {
+      "category": "failure",
+      "expectations": [
+        "Cocaine, Heroin, PCP, Methamphetamine should drop OUT of top 10 (currently #2-#5)",
+        "Naltrexone (currently #6) should rise to top 3",
+        "Baclofen, Disulfiram should remain visible"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Piracetam",
+          "logit": 6.255666255950928,
+          "proba": 0.5318321983143219,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "Acamprosate",
+          "logit": 6.188902854919434,
+          "proba": 0.5192652617089616,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "Acetylcysteine",
+          "logit": 5.8742852210998535,
+          "proba": 0.4599816230013315,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "Chlormethiazole",
+          "logit": 5.760542392730713,
+          "proba": 0.4387380806466119,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "oxiracetam",
+          "logit": 5.541584491729736,
+          "proba": 0.39853235891966593,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "Carnosine",
+          "logit": 5.512790203094482,
+          "proba": 0.3933333828661767,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "aniracetam",
+          "logit": 5.499105930328369,
+          "proba": 0.39087097496656603,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "danitracen",
+          "logit": 5.421244144439697,
+          "proba": 0.37696903443172913,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "RS194B",
+          "logit": 5.400930404663086,
+          "proba": 0.3733741279394528,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "Clozapine",
+          "logit": 5.384705066680908,
+          "proba": 0.3705127362279781,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "Clonazepam",
+          "logit": 5.376977443695068,
+          "proba": 0.3691531199082922,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "dimiracetam",
+          "logit": 5.303302764892578,
+          "proba": 0.35629735393857015,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "Deanol",
+          "logit": 5.299506187438965,
+          "proba": 0.35564027045424906,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "metiapine",
+          "logit": 5.297635078430176,
+          "proba": 0.35531663259467,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "Silymarin",
+          "logit": 5.195652484893799,
+          "proba": 0.3378835354413377,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "Chlorprothixene",
+          "logit": 4.989329814910889,
+          "proba": 0.3039622467014892,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "alpha-Tocopherol",
+          "logit": 4.9746222496032715,
+          "proba": 0.3016182660386893,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "Chlorpromazine",
+          "logit": 4.952383518218994,
+          "proba": 0.29809361739178075,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 19,
+          "drug": "etazepine",
+          "logit": 4.938226222991943,
+          "proba": 0.2958621970332968,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 20,
+          "drug": "Risperidone",
+          "logit": 4.875593662261963,
+          "proba": 0.28610770075196945,
+          "tier": "Moderate"
+        }
+      ]
+    },
+    "Sleep Initiation and Maintenance Disorders": {
+      "category": "failure",
+      "expectations": [
+        "Nicotine should drop OUT of top 10 (currently #1 \u2014 stimulant, disrupts sleep)",
+        "Trazodone (currently #10) should rise into top 5",
+        "Melatonin (currently #3) should remain visible"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Resveratrol",
+          "logit": 4.014434337615967,
+          "proba": 0.1730042972427577,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 2,
+          "drug": "alpha-Tocopherol",
+          "logit": 3.7461130619049072,
+          "proba": 0.14590980154092378,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 3,
+          "drug": "Acetylcysteine",
+          "logit": 3.0476913452148438,
+          "proba": 0.09159520733645148,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 4,
+          "drug": "Carnosine",
+          "logit": 3.0122461318969727,
+          "proba": 0.08939292372128568,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 5,
+          "drug": "Plant Extracts",
+          "logit": 2.812964916229248,
+          "proba": 0.077879415721125,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 6,
+          "drug": "Vitamin E",
+          "logit": 2.8085262775421143,
+          "proba": 0.07763911478877701,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 7,
+          "drug": "Glutamine",
+          "logit": 2.7848763465881348,
+          "proba": 0.07637015831177317,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 8,
+          "drug": "gamma-Tocopherol",
+          "logit": 2.642037868499756,
+          "proba": 0.06910283066937412,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 9,
+          "drug": "Pregnenolone Carbonitrile",
+          "logit": 2.5893263816833496,
+          "proba": 0.06658647353187487,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 10,
+          "drug": "Betaine",
+          "logit": 2.572155714035034,
+          "proba": 0.06578531652430586,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 11,
+          "drug": "Hesperidin",
+          "logit": 2.546598434448242,
+          "proba": 0.06460943602547223,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 12,
+          "drug": "Unithiol",
+          "logit": 2.47275972366333,
+          "proba": 0.061321235632378866,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 13,
+          "drug": "Plant Preparations",
+          "logit": 2.4700071811676025,
+          "proba": 0.061201733518180416,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 14,
+          "drug": "sulforaphane",
+          "logit": 2.4153432846069336,
+          "proba": 0.05887315086915038,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 15,
+          "drug": "Curcumin",
+          "logit": 2.3992760181427,
+          "proba": 0.05820466217550551,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 16,
+          "drug": "Biotin",
+          "logit": 2.365940570831299,
+          "proba": 0.056840375917249136,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 17,
+          "drug": "naphthalen-1-yl-(4-pentyloxynaphthalen-1-yl)methanone",
+          "logit": 2.3410024642944336,
+          "proba": 0.055839468171808355,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 18,
+          "drug": "salubrinal",
+          "logit": 2.325725555419922,
+          "proba": 0.05523453369709626,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 19,
+          "drug": "Ascorbic Acid",
+          "logit": 2.2705376148223877,
+          "proba": 0.05310024701898494,
+          "tier": "Speculative"
+        },
+        {
+          "rank": 20,
+          "drug": "Pregnenolone",
+          "logit": 2.2361738681793213,
+          "proba": 0.051810868550591034,
+          "tier": "Speculative"
+        }
+      ]
+    },
+    "Attention Deficit Disorder with Hyperactivity": {
+      "category": "failure",
+      "expectations": [
+        "Methylphenidate should rise into top 5 (currently #8 \u2014 primary ADHD treatment)",
+        "Dextroamphetamine should rise (currently #6)",
+        "Cannabidiol, Nicotine, Scopolamine should drop OUT of top 5 (currently #1-#3)"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Resveratrol",
+          "logit": 4.938866138458252,
+          "proba": 0.29596284896171804,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 2,
+          "drug": "Carnosine",
+          "logit": 4.768164157867432,
+          "proba": 0.2698337772364911,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 3,
+          "drug": "naringin",
+          "logit": 4.518309593200684,
+          "proba": 0.2343175960477824,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 4,
+          "drug": "sulforaphane",
+          "logit": 4.441661834716797,
+          "proba": 0.22409603020224464,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 5,
+          "drug": "Cannabidiol",
+          "logit": 4.43931245803833,
+          "proba": 0.22378778825620754,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 6,
+          "drug": "Hesperidin",
+          "logit": 4.228683948516846,
+          "proba": 0.19738190517185758,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 7,
+          "drug": "Glutamine",
+          "logit": 4.072051048278809,
+          "proba": 0.1793163428623495,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 8,
+          "drug": "genipin",
+          "logit": 4.056423664093018,
+          "proba": 0.17758673963388671,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 9,
+          "drug": "Pyrrolidines",
+          "logit": 4.055423259735107,
+          "proba": 0.1774764638924734,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 10,
+          "drug": "Imino Acids",
+          "logit": 4.018556118011475,
+          "proba": 0.17344994968947047,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 11,
+          "drug": "Plant Extracts",
+          "logit": 3.9835052490234375,
+          "proba": 0.16968906544659113,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 12,
+          "drug": "Acetylcysteine",
+          "logit": 3.9667673110961914,
+          "proba": 0.16791613602396446,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 13,
+          "drug": "Catechin",
+          "logit": 3.916609287261963,
+          "proba": 0.16269179925599483,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 14,
+          "drug": "theanine",
+          "logit": 3.9027554988861084,
+          "proba": 0.16127210203766482,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 15,
+          "drug": "naringenin",
+          "logit": 3.811532974243164,
+          "proba": 0.15217276497904844,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 16,
+          "drug": "ginsenoside Rg1",
+          "logit": 3.7721025943756104,
+          "proba": 0.1483719255224205,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 17,
+          "drug": "Curcumin",
+          "logit": 3.7573368549346924,
+          "proba": 0.1469689083183429,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 18,
+          "drug": "Betaine",
+          "logit": 3.6262004375457764,
+          "proba": 0.134986025393857,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 19,
+          "drug": "Luteolin",
+          "logit": 3.601184844970703,
+          "proba": 0.1327960664542171,
+          "tier": "Moderate"
+        },
+        {
+          "rank": 20,
+          "drug": "epigallocatechin gallate",
+          "logit": 3.5698986053466797,
+          "proba": 0.13009957573340547,
+          "tier": "Moderate"
+        }
+      ]
+    },
+    "Amnesia": {
+      "category": "failure",
+      "expectations": [
+        "Scopolamine should drop OUT of top 10 (currently #1 \u2014 INDUCES amnesia)",
+        "Strychnine, Phencyclidine, Picrotoxin should drop OUT of top 20 (poisons/illicit)",
+        "Donepezil, Galantamine, Rivastigmine should rise into top 5"
+      ],
+      "results": [
+        {
+          "rank": 1,
+          "drug": "Catechin",
+          "logit": 10.848706245422363,
+          "proba": 0.973271889924174,
+          "tier": "Strong"
+        },
+        {
+          "rank": 2,
+          "drug": "naringenin",
+          "logit": 10.789965629577637,
+          "proba": 0.9720937700247404,
+          "tier": "Strong"
+        },
+        {
+          "rank": 3,
+          "drug": "naringin",
+          "logit": 10.528277397155762,
+          "proba": 0.966204397661651,
+          "tier": "Strong"
+        },
+        {
+          "rank": 4,
+          "drug": "puerarin",
+          "logit": 10.164027214050293,
+          "proba": 0.9559785947684636,
+          "tier": "Strong"
+        },
+        {
+          "rank": 5,
+          "drug": "Luteolin",
+          "logit": 10.036526679992676,
+          "proba": 0.9517453317049298,
+          "tier": "Strong"
+        },
+        {
+          "rank": 6,
+          "drug": "luteolin-7-glucoside",
+          "logit": 9.938437461853027,
+          "proba": 0.9482284132962254,
+          "tier": "Strong"
+        },
+        {
+          "rank": 7,
+          "drug": "astringin",
+          "logit": 9.910481452941895,
+          "proba": 0.9471824877203606,
+          "tier": "Strong"
+        },
+        {
+          "rank": 8,
+          "drug": "proanthocyanidin",
+          "logit": 9.901838302612305,
+          "proba": 0.9468551012533749,
+          "tier": "Strong"
+        },
+        {
+          "rank": 9,
+          "drug": "Hesperidin",
+          "logit": 9.86833667755127,
+          "proba": 0.9455679390086429,
+          "tier": "Strong"
+        },
+        {
+          "rank": 10,
+          "drug": "Resveratrol",
+          "logit": 9.856639862060547,
+          "proba": 0.9451116563507541,
+          "tier": "Strong"
+        },
+        {
+          "rank": 11,
+          "drug": "Rutin",
+          "logit": 9.80810546875,
+          "proba": 0.9431796243845538,
+          "tier": "Strong"
+        },
+        {
+          "rank": 12,
+          "drug": "formononetin",
+          "logit": 9.752018928527832,
+          "proba": 0.9408674130152861,
+          "tier": "Strong"
+        },
+        {
+          "rank": 13,
+          "drug": "Proanthocyanidins",
+          "logit": 9.7222318649292,
+          "proba": 0.9396038378248829,
+          "tier": "Strong"
+        },
+        {
+          "rank": 14,
+          "drug": "ginsenoside Rg1",
+          "logit": 9.702779769897461,
+          "proba": 0.9387650832371108,
+          "tier": "Strong"
+        },
+        {
+          "rank": 15,
+          "drug": "kaempferol",
+          "logit": 9.672869682312012,
+          "proba": 0.9374541251090106,
+          "tier": "Strong"
+        },
+        {
+          "rank": 16,
+          "drug": "Apigenin",
+          "logit": 9.670313835144043,
+          "proba": 0.93734089557966,
+          "tier": "Strong"
+        },
+        {
+          "rank": 17,
+          "drug": "Saponins",
+          "logit": 9.564208984375,
+          "proba": 0.9324681576914302,
+          "tier": "Strong"
+        },
+        {
+          "rank": 18,
+          "drug": "loganin",
+          "logit": 9.549429893493652,
+          "proba": 0.9317621719286895,
+          "tier": "Strong"
+        },
+        {
+          "rank": 19,
+          "drug": "epicatechin gallate",
+          "logit": 9.544978141784668,
+          "proba": 0.931548178237034,
+          "tier": "Strong"
+        },
+        {
+          "rank": 20,
+          "drug": "isorhapontigenin",
+          "logit": 9.5141019821167,
+          "proba": 0.9300467864330487,
+          "tier": "Strong"
+        }
+      ]
+    }
+  }
+}

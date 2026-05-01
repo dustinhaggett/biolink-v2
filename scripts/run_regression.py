@@ -188,6 +188,10 @@ def main() -> None:
     parser.add_argument("--label", type=str, default="baseline", help="Label for this run (e.g. 'baseline', 'after-hard-negatives').")
     parser.add_argument("--top-n", type=int, default=20, help="Top-N drugs to record per query.")
     parser.add_argument("--out", type=Path, default=None, help="Output JSON path (defaults to results/regression_<label>_<timestamp>.json).")
+    parser.add_argument("--weights", type=Path, default=REPO_ROOT / "models" / "biolink_v1.pt",
+                        help="Model weights path (default: models/biolink_v1.pt).")
+    parser.add_argument("--temperature", type=Path, default=REPO_ROOT / "data" / "temperature.json",
+                        help="Temperature/calibration JSON (default: data/temperature.json).")
     args = parser.parse_args()
 
     if args.out is None:
@@ -195,22 +199,26 @@ def main() -> None:
         args.out = REPO_ROOT / "results" / f"regression_{args.label}_{ts}.json"
     args.out.parent.mkdir(parents=True, exist_ok=True)
 
+    # Resolve relative paths against REPO_ROOT for consistent display
+    args.weights = (REPO_ROOT / args.weights).resolve() if not args.weights.is_absolute() else args.weights
+    args.temperature = (REPO_ROOT / args.temperature).resolve() if not args.temperature.is_absolute() else args.temperature
+
     print(f"[{datetime.now():%H:%M:%S}] Loading model and embeddings...", file=sys.stderr)
-    weights = REPO_ROOT / "models" / "biolink_v1.pt"
+    print(f"  weights:     {args.weights.relative_to(REPO_ROOT)}", file=sys.stderr)
+    print(f"  temperature: {args.temperature.relative_to(REPO_ROOT)}", file=sys.stderr)
     biowordvec = REPO_ROOT / "data" / "BioWordVec_PubMed_MIMICIII_d200.vec.bin"
     drugs_list = REPO_ROOT / "data" / "drugs_list.txt"
     diseases_list = REPO_ROOT / "data" / "diseases_list.txt"
-    temperature_path = REPO_ROOT / "data" / "temperature.json"
 
     model = BioLinkModel(
-        weights_path=str(weights),
+        weights_path=str(args.weights),
         biowordvec_path=str(biowordvec),
         drugs_list_path=str(drugs_list),
         diseases_list_path=str(diseases_list),
     )
     scaler = (
-        TemperatureScaler.load(str(temperature_path))
-        if temperature_path.exists()
+        TemperatureScaler.load(str(args.temperature))
+        if args.temperature.exists()
         else TemperatureScaler(T=1.0)
     )
 
@@ -228,8 +236,10 @@ def main() -> None:
             "label": args.label,
             "timestamp": datetime.now().isoformat(timespec="seconds"),
             "git_commit": get_git_commit(),
-            "weights": str(weights.relative_to(REPO_ROOT)),
+            "weights": str(args.weights.relative_to(REPO_ROOT)),
+            "temperature_path": str(args.temperature.relative_to(REPO_ROOT)),
             "temperature_T": getattr(scaler, "T", None),
+            "prior_shift": getattr(scaler, "prior_shift", 0.0),
             "top_n": args.top_n,
             "n_drugs": len(model.drug_names),
             "n_diseases": len(model.disease_names),
