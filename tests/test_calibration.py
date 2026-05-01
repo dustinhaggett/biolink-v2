@@ -6,10 +6,13 @@ Tests:
   - Temperature T must be > 0 (constructor validation)
   - calibrated_proba() math: sigmoid(logit / T)
   - Fitted T > 0 after .fit()
-  - confidence_tier() boundary conditions per SPEC §3.2:
-      Strong      >= 0.80
-      Moderate    >= 0.50
-      Speculative < 0.50
+  - confidence_tier() boundary conditions per SPEC §3.2 (revised 2026-05-01):
+      Strong      >= 0.30   (post prior-correction; ~30x baseline rate of 1%)
+      Moderate    >= 0.10
+      Speculative <  0.10
+      (Original thresholds were 0.80 / 0.50, calibrated for the saturated
+      pre-prior-correction distribution. See core.calibration.confidence_tier
+      docstring for rationale.)
   - TemperatureScaler.load() round-trips through JSON
 """
 
@@ -182,52 +185,133 @@ class TestLoad:
         expected = float(expit(logit / T_value))
         assert scaler.calibrated_proba(logit) == pytest.approx(expected, abs=1e-6)
 
+    def test_load_legacy_json_no_prior_shift(self, tmp_path):
+        """Backward compat: pre-prior-correction JSON files only have {"T": ...}."""
+        save_path = str(tmp_path / "temperature.json")
+        with open(save_path, "w") as f:
+            json.dump({"T": 1.5}, f)  # No prior_shift key
+        scaler = TemperatureScaler.load(save_path)
+        assert scaler.T == pytest.approx(1.5)
+        assert scaler.prior_shift == 0.0
+
+    def test_load_with_prior_shift(self, tmp_path):
+        save_path = str(tmp_path / "temperature.json")
+        with open(save_path, "w") as f:
+            json.dump({"T": 1.5, "prior_shift": 4.6}, f)
+        scaler = TemperatureScaler.load(save_path)
+        assert scaler.T == pytest.approx(1.5)
+        assert scaler.prior_shift == pytest.approx(4.6)
+
+
+# ---------------------------------------------------------------------------
+# TemperatureScaler — prior_shift correction
+# ---------------------------------------------------------------------------
+
+class TestPriorShift:
+    def test_default_prior_shift_is_zero(self):
+        """Backward compat: existing callers see no behavior change."""
+        scaler = TemperatureScaler(T=1.0)
+        assert scaler.prior_shift == 0.0
+        # Without shift, calibrated_proba(0) = sigmoid(0) = 0.5 (unchanged)
+        assert scaler.calibrated_proba(0.0) == pytest.approx(0.5)
+
+    def test_positive_shift_reduces_probability(self):
+        """A positive shift represents lower real prior → lower calibrated probs."""
+        unshifted = TemperatureScaler(T=1.0, prior_shift=0.0)
+        shifted = TemperatureScaler(T=1.0, prior_shift=4.6)
+        logit = 2.0
+        assert shifted.calibrated_proba(logit) < unshifted.calibrated_proba(logit)
+
+    def test_shift_preserves_ranking(self):
+        """Monotonic transform — ranking by probability must equal ranking by logit."""
+        scaler = TemperatureScaler(T=1.384, prior_shift=4.595)
+        logits = [5.0, 3.5, 1.0, -2.0, 8.0]
+        probs = [scaler.calibrated_proba(z) for z in logits]
+        # Argsort of probs descending should equal argsort of logits descending
+        prob_order = sorted(range(len(probs)), key=lambda i: -probs[i])
+        logit_order = sorted(range(len(logits)), key=lambda i: -logits[i])
+        assert prob_order == logit_order
+
+    def test_shift_for_prior_known_values(self):
+        """log_odds(0.5) - log_odds(0.01) ≈ 4.5951"""
+        shift = TemperatureScaler.shift_for_prior(p_train=0.5, p_real=0.01)
+        assert shift == pytest.approx(4.5951, abs=1e-3)
+
+    def test_shift_for_prior_zero_when_priors_match(self):
+        shift = TemperatureScaler.shift_for_prior(p_train=0.3, p_real=0.3)
+        assert shift == pytest.approx(0.0, abs=1e-10)
+
+    def test_shift_for_prior_rejects_invalid(self):
+        with pytest.raises(ValueError):
+            TemperatureScaler.shift_for_prior(p_train=0.5, p_real=0.0)
+        with pytest.raises(ValueError):
+            TemperatureScaler.shift_for_prior(p_train=1.0, p_real=0.5)
+
+    def test_save_persists_prior_shift(self, tmp_path):
+        save_path = str(tmp_path / "temperature.json")
+        scaler = TemperatureScaler(T=1.5, prior_shift=4.6)
+        scaler.save(save_path)
+        with open(save_path) as f:
+            data = json.load(f)
+        assert data["T"] == pytest.approx(1.5)
+        assert data["prior_shift"] == pytest.approx(4.6)
+
+    def test_calibrated_proba_batch_applies_shift(self):
+        scaler = TemperatureScaler(T=1.0, prior_shift=4.6)
+        logits = np.array([2.0, 3.0, 5.0])
+        probs = scaler.calibrated_proba_batch(logits)
+        # Each element should match scalar version
+        for i, z in enumerate(logits):
+            assert probs[i] == pytest.approx(scaler.calibrated_proba(float(z)), abs=1e-5)
+
 
 # ---------------------------------------------------------------------------
 # confidence_tier() — boundary conditions (SPEC §3.2)
 # ---------------------------------------------------------------------------
 
 class TestConfidenceTier:
-    # --- Strong boundary ---
-    def test_strong_at_0_80(self):
-        assert confidence_tier(0.80) == "Strong"
+    # --- Strong boundary (>= 0.30) ---
+    def test_strong_at_0_30(self):
+        assert confidence_tier(0.30) == "Strong"
 
-    def test_strong_above_0_80(self):
+    def test_strong_above_0_30(self):
+        assert confidence_tier(0.50) == "Strong"
         assert confidence_tier(0.95) == "Strong"
         assert confidence_tier(1.0) == "Strong"
 
-    def test_not_strong_just_below_0_80(self):
-        assert confidence_tier(0.799) != "Strong"
+    def test_not_strong_just_below_0_30(self):
+        assert confidence_tier(0.299) != "Strong"
 
-    # --- Moderate boundary ---
-    def test_moderate_at_0_50(self):
-        assert confidence_tier(0.50) == "Moderate"
+    # --- Moderate boundary (>= 0.10) ---
+    def test_moderate_at_0_10(self):
+        assert confidence_tier(0.10) == "Moderate"
 
-    def test_moderate_between_0_50_and_0_80(self):
-        assert confidence_tier(0.65) == "Moderate"
-        assert confidence_tier(0.799) == "Moderate"
+    def test_moderate_between_0_10_and_0_30(self):
+        assert confidence_tier(0.15) == "Moderate"
+        assert confidence_tier(0.299) == "Moderate"
 
-    def test_not_moderate_just_below_0_50(self):
-        assert confidence_tier(0.499) != "Moderate"
+    def test_not_moderate_just_below_0_10(self):
+        assert confidence_tier(0.099) != "Moderate"
 
-    # --- Speculative boundary ---
-    def test_speculative_below_0_50(self):
-        assert confidence_tier(0.499) == "Speculative"
+    # --- Speculative boundary (< 0.10) ---
+    def test_speculative_below_0_10(self):
+        assert confidence_tier(0.099) == "Speculative"
         assert confidence_tier(0.0) == "Speculative"
-        assert confidence_tier(0.3) == "Speculative"
+        assert confidence_tier(0.05) == "Speculative"
 
-    def test_not_speculative_at_0_50(self):
-        assert confidence_tier(0.50) != "Speculative"
+    def test_not_speculative_at_0_10(self):
+        assert confidence_tier(0.10) != "Speculative"
 
     # --- Exhaustive spot checks ---
     @pytest.mark.parametrize("proba,expected", [
         (0.0,   "Speculative"),
-        (0.1,   "Speculative"),
-        (0.499, "Speculative"),
-        (0.50,  "Moderate"),
-        (0.75,  "Moderate"),
-        (0.799, "Moderate"),
-        (0.80,  "Strong"),
+        (0.05,  "Speculative"),
+        (0.099, "Speculative"),
+        (0.10,  "Moderate"),
+        (0.20,  "Moderate"),
+        (0.299, "Moderate"),
+        (0.30,  "Strong"),
+        (0.50,  "Strong"),
         (0.9,   "Strong"),
         (1.0,   "Strong"),
     ])
