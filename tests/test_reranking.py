@@ -155,16 +155,77 @@ class TestDiscoveryBoost:
         """Methamphetamine-for-alcoholism pattern: Perplexity classifies harm
         as UNKNOWN (the field is sensitive to phrasing) but correctly flags
         Drug Interactions. Without this guard, the discovery boost fires and
-        promotes a clearly-dangerous combo. Interactions=True is a backstop."""
+        promotes a clearly-dangerous combo. Interactions=True is a backstop.
+
+        Note: Rule 3 (unvalidated-interactions demote) now also fires here, so
+        the result is actively demoted to ×0.5 — even better than just blocking
+        the boost. This test asserts the discovery-boost reason isn't applied."""
         results = [_result(
             "MethForAlcoholism", 0.93, 1,
             verdict=VERDICT_INSUFFICIENT, harm=HARM_UNKNOWN,
-            interactions=True,  # The safety backstop
+            interactions=True,
             trials=[{"id": "NCT_ACTIVE", "status": "RECRUITING"}],
         )]
         out = apply_evidence_reranking(results)
-        assert out[0]["reranked_proba"] == pytest.approx(0.93)  # No boost
+        # Demoted to ×0.5 by Rule 3, NOT boosted ×1.15 by Rule 4
+        assert out[0]["reranked_proba"] == pytest.approx(0.93 * 0.5)
         assert "active trials" not in out[0]["rerank_reason"].lower()
+        assert "interactions" in out[0]["rerank_reason"].lower()
+
+
+class TestUnvalidatedInteractionsDemote:
+    """Rule 3: drug interactions flagged + no SoC/SUPPORTS validation = mild demote.
+
+    Catches the Amphetamine-for-Alcoholism case: verdict=INSUFFICIENT,
+    interactions=True, harm=UNKNOWN. Without this rule, the candidate sits at
+    its model-only score (75%+) and confuses users about safety.
+    """
+
+    def test_insufficient_plus_interactions_demotes_to_05x(self):
+        result = _result("Amphetamine", 0.75, 1,
+                         verdict=VERDICT_INSUFFICIENT, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.75 * 0.5)
+        assert "interactions" in out[0]["rerank_reason"].lower()
+
+    def test_conflicts_plus_interactions_demotes(self):
+        """Mixed evidence + dangerous interaction = demote."""
+        result = _result("X", 0.70, 1, verdict=VERDICT_CONFLICTS, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.70 * 0.5)
+
+    def test_unknown_plus_interactions_demotes(self):
+        result = _result("X", 0.50, 1, harm=HARM_UNKNOWN, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.50 * 0.5)
+
+    def test_standard_of_care_plus_interactions_still_boosts(self):
+        """SoC validation overrides interactions warning. Established treatments
+        often have interactions; that's a prescribing concern, not a 'don't show
+        this in top 5' concern. Chlordiazepoxide for Alcoholism is the exemplar:
+        SoC + interactions, should still rank top."""
+        result = _result("Chlordiazepoxide", 0.50, 1,
+                         verdict=VERDICT_STANDARD, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.50 * 1.5)
+        assert "standard" in out[0]["rerank_reason"].lower()
+
+    def test_supports_plus_interactions_still_boosts(self):
+        result = _result("X", 0.40, 1, verdict=VERDICT_SUPPORTS, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.40 * 1.3)
+
+    def test_interactions_alone_no_verdict_demotes(self):
+        """Edge case: interactions flagged with no verdict at all."""
+        result = _result("X", 0.50, 1, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.50 * 0.5)
+
+    def test_no_interactions_no_demote(self):
+        """Default behavior: no interactions, no demote."""
+        result = _result("X", 0.50, 1, verdict=VERDICT_CONFLICTS)
+        out = apply_evidence_reranking([result])
+        assert out[0]["reranked_proba"] == pytest.approx(0.50)  # × 1.0
 
 
 # ---------------------------------------------------------------------------

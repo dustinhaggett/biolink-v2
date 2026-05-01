@@ -57,6 +57,7 @@ class RerankConfig:
     boost_supports: float = 1.3              # Strong supporting evidence
     boost_unknown_with_trials: float = 1.15  # Discovery candidate with active trials
     no_change: float = 1.0
+    demote_unvalidated_interactions: float = 0.5  # Interactions flagged + no positive validation
     demote_harmful: float = 0.3              # Evidence of indication-specific harm
     demote_harmful_with_interactions: float = 0.1  # Harm + drug interactions = stay-away
 
@@ -81,11 +82,12 @@ def _has_active_trials(result: dict) -> bool:
 def _multiplier(result: dict, config: RerankConfig) -> tuple[float, str]:
     """Return (multiplier, reason) for a single result based on its evidence.
 
-    Order of precedence:
+    Order of precedence (later rules cannot override earlier ones):
       1. Indication-specific harm (always demote, regardless of other signals)
       2. Standard-of-care or supports verdict (boost)
-      3. Insufficient/unknown + active trial (mild discovery boost)
-      4. Default (no change)
+      3. Drug interactions flagged AND no positive validation (mild demote)
+      4. Insufficient/unknown + active trial AND no interactions (discovery boost)
+      5. Default (no change)
     """
     evidence = result.get("evidence") or {}
     verdict = (evidence.get("verdict") or "").lower()
@@ -98,30 +100,41 @@ def _multiplier(result: dict, config: RerankConfig) -> tuple[float, str]:
             return config.demote_harmful_with_interactions, "harm + drug interactions"
         return config.demote_harmful, "indication-specific harm"
 
-    # Rule 2: Validated therapeutic evidence → boost
+    # Rule 2: Validated therapeutic evidence → boost. SoC/SUPPORTS positive
+    # validation overrides any drug-interactions flag — well-established
+    # treatments often interact with other meds; that's a prescribing concern,
+    # not a "this drug shouldn't be on the list" concern.
     if verdict == VERDICT_STANDARD:
         return config.boost_standard_of_care, "standard of care"
     if verdict == VERDICT_SUPPORTS:
         return config.boost_supports, "evidence supports"
 
-    # Rule 3: Discovery boost for unstudied candidates with active trial activity.
-    # Important guard: skip if has_interactions=True. Without this, drugs like
-    # methamphetamine for alcoholism get boosted because Perplexity sometimes
-    # classifies clearly-dangerous combos as INSUFFICIENT-not-HARMFUL (its harm
-    # field is sensitive to specific phrasing like "contraindicated"), while
-    # correctly flagging the dangerous interaction. The interactions flag is a
-    # second layer of safety for when the primary harm classification misses.
-    # See docs/POST_PRESENTATION_TODO.md "Reranking validation edge cases".
+    # Rule 3: Mild demote for "interactions flagged but no positive validation."
+    # Catches the Amphetamine-for-Alcoholism pattern: Perplexity classified harm
+    # as INSUFFICIENT (its harm field is sensitive to phrasing) but correctly
+    # flagged drug interactions. Without an active boost from SoC/SUPPORTS, we
+    # treat the interactions flag as a mild safety signal — not as definitive
+    # harm (which would be × 0.3) but as "this is probably not a candidate the
+    # user should see in the top 5."
+    if has_interactions:
+        return config.demote_unvalidated_interactions, "drug interactions, unvalidated"
+
+    # Rule 4: Discovery boost for unstudied candidates with active trial activity.
+    # Important guard: skip if has_interactions=True (handled above). Without
+    # this guard, drugs like methamphetamine for alcoholism would get boosted
+    # because Perplexity sometimes classifies clearly-dangerous combos as
+    # INSUFFICIENT-not-HARMFUL while correctly flagging interactions. The
+    # interactions flag is a second layer of safety for when the primary harm
+    # classification misses. See docs/POST_PRESENTATION_TODO.md.
     if (
         verdict in (VERDICT_INSUFFICIENT, "", "unknown")
         and _has_active_trials(result)
-        and not has_interactions
     ):
         return config.boost_unknown_with_trials, "active trials, no established verdict"
 
-    # Default — preserve. CONFLICTS without harm is preserved (mixed evidence,
-    # but no specific contraindication for THIS indication). INSUFFICIENT without
-    # active trials is preserved (pure discovery space).
+    # Default — preserve. CONFLICTS without harm/interactions is preserved
+    # (mixed evidence but no specific contraindication for THIS indication).
+    # INSUFFICIENT without active trials is preserved (pure discovery space).
     return config.no_change, "no adjustment"
 
 
