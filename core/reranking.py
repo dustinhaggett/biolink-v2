@@ -130,17 +130,25 @@ def apply_evidence_reranking(
 
     Returns:
         New sorted list (descending by adjusted_proba). Each result gains:
-          - 'reranked_proba': float — adjusted probability
+          - 'reranked_proba': float — adjusted probability (same as 'proba' after rerank)
           - 'rerank_multiplier': float — what was applied
           - 'rerank_reason': str — human-readable explanation
           - 'original_rank': int — pre-rerank position (1-indexed)
-        The 'rank' field is rewritten to the new position.
+          - 'model_proba': float — pre-rerank probability (model only, no evidence)
+          - 'model_tier': str — pre-rerank tier
+        The user-facing 'proba', 'tier', and 'rank' are OVERWRITTEN to reflect the
+        rerank — so UI components that read 'proba'/'tier' show the evidence-adjusted
+        view by default. Originals are preserved as 'model_proba'/'model_tier' for
+        debugging or "show details" UI.
 
     Properties:
       - Pure function. Input results are NOT mutated; new list returned.
       - Order-preserving for ties (Python's sort is stable).
       - Safe on missing fields. Defaults gracefully if 'evidence' absent.
     """
+    # Local import to avoid circular dep with core.calibration
+    from core.calibration import confidence_tier
+
     config = config or RerankConfig()
 
     # Make a defensive copy so callers don't see mutation
@@ -151,8 +159,22 @@ def apply_evidence_reranking(
         mult, reason = _multiplier(new, config)
         new["rerank_multiplier"] = mult
         new["rerank_reason"] = reason
-        proba = float(new.get("proba", 0.0))
-        new["reranked_proba"] = max(0.0, min(1.0, proba * mult))
+
+        # Preserve the model-only confidence under separate keys for transparency
+        original_proba = float(new.get("proba", 0.0))
+        new["model_proba"] = original_proba
+        new["model_tier"] = new.get("tier", confidence_tier(original_proba))
+
+        # Overwrite user-facing fields so UI shows the evidence-adjusted view.
+        # This was a 2026-05-01 bugfix: previously the reranker added reranked_proba
+        # but didn't update proba/tier, so the UI showed pre-rerank values next to
+        # post-rerank rank positions — e.g. "Nicotine #20: 69% Strong" with a HARMFUL
+        # badge, even though the rerank had multiplied the score by 0.1.
+        adjusted = max(0.0, min(1.0, original_proba * mult))
+        new["reranked_proba"] = adjusted
+        new["proba"] = adjusted
+        new["tier"] = confidence_tier(adjusted)
+
         new_results.append(new)
 
     # Sort by adjusted probability, descending. Stable so ties keep input order.

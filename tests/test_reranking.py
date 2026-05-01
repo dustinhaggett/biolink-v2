@@ -217,6 +217,50 @@ class TestRerankingBehavior:
         assert [r["drug"] for r in out] == ["Top2Strong", "NotEnriched3", "NotEnriched4", "Top1Harmful"]
 
 
+class TestProbaAndTierOverwrite:
+    """User-facing 'proba' and 'tier' must reflect post-rerank values, not pre-rerank.
+
+    Bugfix 2026-05-01: previously the UI showed pre-rerank scores next to
+    post-rerank ranks — e.g. Nicotine demoted to #20 but still displayed
+    "69% Strong" with a HARMFUL badge.
+    """
+
+    def test_proba_overwritten_on_demotion(self):
+        result = _result("Nicotine", 0.69, 1, harm=HARM_HARMFUL, interactions=True)
+        out = apply_evidence_reranking([result])
+        # Original was 0.69; harm + interactions = ×0.1 = 0.069
+        assert out[0]["proba"] == pytest.approx(0.069, abs=1e-3)
+        assert out[0]["tier"] == "Speculative"  # 0.069 < 0.10 threshold
+
+    def test_proba_overwritten_on_boost(self):
+        result = _result("Topiramate", 0.50, 1, verdict=VERDICT_STANDARD)
+        out = apply_evidence_reranking([result])
+        # Original 0.50; standard-of-care = ×1.5 = 0.75
+        assert out[0]["proba"] == pytest.approx(0.75, abs=1e-3)
+        assert out[0]["tier"] == "Strong"
+
+    def test_proba_unchanged_on_no_adjustment(self):
+        result = _result("Mystery", 0.40, 1)  # no evidence
+        out = apply_evidence_reranking([result])
+        assert out[0]["proba"] == pytest.approx(0.40)
+        # tier may flip if 0.40 was below threshold but it's >= 0.30 = Strong
+        assert out[0]["tier"] == "Strong"
+
+    def test_model_proba_preserved_for_debugging(self):
+        """Original score must be preserved as model_proba so transparency UI works."""
+        result = _result("Nicotine", 0.69, 1, harm=HARM_HARMFUL, interactions=True)
+        out = apply_evidence_reranking([result])
+        assert out[0]["model_proba"] == pytest.approx(0.69)
+        # Tier was Strong before rerank (0.69 >= 0.30); preserved
+        assert out[0]["model_tier"] == "Strong"
+
+    def test_reranked_proba_equals_proba_after_rerank(self):
+        """Both fields should agree — proba IS the reranked value, reranked_proba kept for clarity."""
+        result = _result("X", 0.40, 1, verdict=VERDICT_STANDARD)
+        out = apply_evidence_reranking([result])
+        assert out[0]["proba"] == out[0]["reranked_proba"]
+
+
 # ---------------------------------------------------------------------------
 # Real-world scenarios from documented failures
 # ---------------------------------------------------------------------------
