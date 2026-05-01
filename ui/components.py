@@ -202,6 +202,58 @@ def _format_citation_label(url: str) -> str:
         return url
 
 
+# ── Tier Summary Header ───────────────────────────────────────
+
+def render_tier_summary(
+    tier_counts: dict | None,
+    total_candidates: int | None,
+    showing_count: int,
+) -> None:
+    """Render an honest summary of the candidate distribution.
+
+    Shows: "12 Strong · 87 Moderate · 540 Speculative — showing top 20 of 7,164 candidates"
+
+    This makes the underlying distribution visible. Some diseases have only a few
+    Strong candidates (top 20 covers most signal). Others — like diseases with
+    rich therapeutic literature OR cluster-mismatch failures — have hundreds of
+    Strong candidates that the top-20 cutoff hides. See "Candidate-count finding"
+    in docs/POST_PRESENTATION_TODO.md.
+
+    Backwards compatible: silently no-ops if inference didn't return tier_counts
+    (e.g., older cached results).
+    """
+    if not tier_counts or total_candidates is None:
+        return
+
+    strong = int(tier_counts.get("Strong", 0))
+    moderate = int(tier_counts.get("Moderate", 0))
+    speculative = int(tier_counts.get("Speculative", 0))
+
+    pill = (
+        '<span style="display:inline-block; padding:0.15rem 0.55rem; border-radius:999px; '
+        'font-size:0.75rem; font-weight:600; color:{color}; background:{bg}; '
+        'border:1px solid {color}22; margin-right:0.4rem;">{count:,} {label}</span>'
+    )
+
+    # Pluralization handled inline (Streamlit markdown is fine with this)
+    pills_html = (
+        pill.format(color="#1b7a3d", bg="#e6f4ea", count=strong,      label="Strong")
+        + pill.format(color="#b45309", bg="#fef3c7", count=moderate,    label="Moderate")
+        + pill.format(color="#6b7280", bg="#f3f4f6", count=speculative, label="Speculative")
+    )
+
+    suffix = f"showing top {showing_count} of {total_candidates:,} candidates"
+
+    st.markdown(
+        f'<div style="margin: 0.5rem 0 1rem; padding: 0.5rem 0.75rem; '
+        f'background: #fafbfc; border-radius: 0.5rem; border: 1px solid #e5e7eb;">'
+        f'<div style="margin-bottom: 0.35rem;">{pills_html}</div>'
+        f'<div style="font-size: 0.78rem; color: #6b7280;">{suffix}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
 # ── Result Card ───────────────────────────────────────────────
 
 def render_result_card(result: dict, rank: int, disease_name: str = ""):
