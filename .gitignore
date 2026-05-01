@@ -30,3 +30,10 @@ data/val_labels_*.npy
 
 # Internal working notes (not for public repo)
 docs/POST_PRESENTATION_TODO.md
+
+# pytest cache
+.pytest_cache/
+
+# Timestamped run artifacts (regenerable via scripts/)
+results/*.json
+results/*.png
