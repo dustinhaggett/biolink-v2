@@ -124,6 +124,14 @@ def disease_to_drugs(
     scored = model.score_all_drugs(disease_vec)
     top = scored[: max(0, int(top_n))]
 
+    # Tier counts across ALL candidates (not just top-N) — surfaces the fact that
+    # some diseases have hundreds of "Strong" candidates while others have only a
+    # handful. See docs/POST_PRESENTATION_TODO.md "Candidate-count finding."
+    tier_counts: Dict[str, int] = {"Strong": 0, "Moderate": 0, "Speculative": 0}
+    for _, logit in scored:
+        proba = scaler.calibrated_proba(float(logit))
+        tier_counts[confidence_tier(float(proba))] += 1
+
     results: List[Dict[str, Any]] = []
     for drug_name, logit in top:
         proba = scaler.calibrated_proba(float(logit))
@@ -145,6 +153,8 @@ def disease_to_drugs(
         "display_name": display_name or str(ctd_entity),
         "clarification": None,
         "results": results,
+        "tier_counts": tier_counts,
+        "total_candidates": len(scored),
     }
 
 

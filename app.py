@@ -244,6 +244,9 @@ def _run_pipeline(query: str):
 
         st.session_state.ctd_entity = output["ctd_entity"]
         st.session_state.disease_name = output.get("display_name", output["ctd_entity"])
+        # Capture tier counts + total candidates for the results summary header
+        st.session_state.tier_counts = output.get("tier_counts")
+        st.session_state.total_candidates = output.get("total_candidates")
         results = output["results"]
         st.write(f"Found {len(results)} drug candidates")
 
@@ -306,6 +309,17 @@ def _render_results(min_conf: float, fda_filters: set):
     st.markdown(
         f'<h1>Results for: <span class="primary-text">{disease}</span></h1>',
         unsafe_allow_html=True,
+    )
+
+    # Tier-distribution summary across ALL 7,164 candidates (before filtering).
+    # Surfaces the candidate-count finding from docs/POST_PRESENTATION_TODO.md —
+    # makes visible that some diseases have only a few Strong candidates while
+    # others have hundreds (Amnesia: 951 Strong = cluster mismatch).
+    from ui.components import render_tier_summary
+    render_tier_summary(
+        tier_counts=st.session_state.get("tier_counts"),
+        total_candidates=st.session_state.get("total_candidates"),
+        showing_count=len(st.session_state.results),
     )
 
     # Apply filters
