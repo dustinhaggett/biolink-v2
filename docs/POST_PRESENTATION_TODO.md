@@ -15,6 +15,7 @@ Captured during pre-presentation review (2026-04-30), revised post-presentation 
 - ⚠️ **Decision: do NOT ship retrained model as production yet.** The Perplexity-judge work (Days 8-9) is the better mechanism for safety re-ranking. Hard negatives can complement but don't replace it.
 - ✅ **Days 8-9 — Harm-aware reranking done.** Added `HARM_FOR_INDICATION: HARMFUL/NOT_HARMFUL/UNKNOWN` to Perplexity's structured output ([enrichment/perplexity.py](../enrichment/perplexity.py)). Built [core/reranking.py](../core/reranking.py) — pure function, harm-only, never demotes on absence of evidence. Wired into [app.py](../app.py) `_run_pipeline`. **21 new reranking tests, all pass.** Locks in the discovery-vs-harm invariants (e.g., `test_insufficient_evidence_unknown_harm_is_unchanged`).
 - ✅ **End-to-end Perplexity validation — 19/20 cases pass.** [scripts/validate_reranking.py](../scripts/validate_reranking.py) runs 20 designed (drug, disease) pairs across 3 categories: 10 documented harm-failures, 7 documented wins, 3 discovery candidates. Initial run (before prompt sharpening) was 4/6; after sharpening to ask a *clinical-practice question* ("would administering this drug worsen the patient's condition?") instead of a literature-evidence question, scored 19/20. The two non-matches reveal Perplexity's reasoning rather than failure (see "Reranking validation edge cases" section).
+- ✅ **Day 10 (partial) — Tier-distribution summary header in UI.** [core/inference.py](../core/inference.py) returns `tier_counts` + `total_candidates` across all 7,164 drugs; [ui/components.py](../ui/components.py) `render_tier_summary()` displays them as colored pills above the results. Makes the candidate-count finding visible in production: Amnesia shows "951 Strong, 1,565 Moderate, 4,648 Speculative" so users can see when something pathological is happening. **"Show more" affordance still pending** but lower priority.
 
 ## Guiding principle: discovery vs. harm
 
@@ -306,8 +307,9 @@ Before AND after every fix, run all 12 queries below and document top 20 + verdi
 | ~~1~~ ✅ | Lock regression test suite — runner + baseline JSON saved | Done 2026-05-01 | No |
 | ~~2-3~~ ✅ | Baselines (popularity, cosine, random) on all 2526 diseases | Done 2026-05-01 — popularity at 0.88, MLP +6.7pts | No |
 | ~~4-7~~ ⚠️ | Hard-negative retraining (3 variants tried) | Done 2026-05-01 — found irreducible trade-off, NOT shipping. See "Hard-negative trade-off" section. | No (per finding) |
-| ~~8-9 (judge)~~ ✅ | Structured Perplexity judge for harm | Done 2026-05-01 — `HARM_FOR_INDICATION` field added; harm-only re-ranking in core/reranking.py; 21 tests | Pending UI tier counts before deploy |
-| **8-9 (UI)** | UI tier counts above results + "show more" affordance | Manual UI test in Streamlit | **Yes — bundle with reranking deploy** |
+| ~~8-9 (judge)~~ ✅ | Structured Perplexity judge for harm | Done 2026-05-01 — `HARM_FOR_INDICATION` field added; harm-only re-ranking in core/reranking.py; 21 tests | Pending deploy |
+| ~~10 (header)~~ ✅ | UI tier counts above results | Done 2026-05-01 — `render_tier_summary()` shows pills above results | Pending deploy |
+| **10 (show more)** | "Show next 20 candidates" expandable section | Manual UI test in Streamlit | Optional — main signal is tier header |
 | **10** | Discovery boost for UNKNOWN verdict + active trials + "show more" affordance | Naltrexone-fibro should move up; user can browse beyond top 20 | **Yes — Day 10** (inference.py + app.py changes) |
 | ~~11~~ ✅ | Inference-prior recalibration (score spread fix) | Done 2026-05-01 — moved up because impact was bigger than expected | Pending deploy with next wave |
 | **12-14** | Write up — paper limitations explicit, not hidden | — | Final deploy + tag release |
