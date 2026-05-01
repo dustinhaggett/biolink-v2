@@ -10,6 +10,10 @@ Captured during pre-presentation review (2026-04-30), revised post-presentation 
 - 🔍 **Discovery during recalibration:** top-20 cutoff is hiding lots of signal. See "Candidate-count finding" section below.
 - ✅ **Days 2-3 — Honest baselines computed.** [scripts/eval_baselines.py](../scripts/eval_baselines.py) evaluates per-disease ranking AUC vs trivial baselines on all 2,526 diseases. **The killer paper finding** (see "Honest baselines" section below).
 
+**2026-05-01 second session (Days 4-7):**
+- ⚠️ **Hard-negative retraining done but reveals a deeper finding** (see "Hard-negative trade-off" section below). Implemented [scripts/retrain_with_hard_negatives.py](../scripts/retrain_with_hard_negatives.py). Trained 3 variants (100% hard, 50/50 mix, 25/75 mix). Each variant fixes some failures but degrades some wins. **No mix is unambiguously better.**
+- ⚠️ **Decision: do NOT ship retrained model as production yet.** The Perplexity-judge work (Days 8-9) is the better mechanism for safety re-ranking. Hard negatives can complement but don't replace it.
+
 ## Guiding principle: discovery vs. harm
 
 **Drug repurposing is a discovery tool.** The most valuable predictions are unexpected uses that don't have strong evidence yet — that's the whole point. A naïve safety filter ("only surface validated treatments") would kill the entire purpose of the tool.
@@ -73,6 +77,57 @@ Reproduced v1's reported AUC of 0.947 on the 50/50 pair-level held-out set (got 
 - The popularity baseline at 0.88 confirms **popularity bias is the dominant failure mode** in the model. Hard-negative training (P0) needs to specifically address this — not just direction blindness.
 - **Add precision@k to the regression suite output.** AUC is too forgiving for the user-facing ranking task.
 - The paper now has a quantitative story to tell, not just qualitative failure cases.
+
+## Hard-negative trade-off finding (2026-05-01) — second paper-worthy result
+
+We retrained the v1 MLP with marker/mechanism pairs as hard negatives — exactly as the original plan called for — but the result was more nuanced than expected. **Hard negatives don't simply "fix" the failures; they introduce a different bias.**
+
+### What we tried
+
+Same v1 architecture, hyperparameters, seed. Only difference: replace some/all random negatives with CTD `marker/mechanism` pairs. Three variants:
+
+| Variant | Negative composition | Val AUC | Wins preserved | Failures improved |
+|---|---|---|---|---|
+| Baseline (v1) | 39,516 random | 0.9497 | 6/6 | 0/6 |
+| **100% hard** | 39,516 marker/mechanism | 0.9161 | **0/6** | 5/6 |
+| **50/50 mix** | 19,758 hard + 19,758 random | 0.9005 | 3/6 | 5/6 |
+| **25/75 mix** | 9,879 hard + 29,637 random | 0.9?? | 4/6 | 5/6 |
+
+### What 100% hard negatives did
+
+**Inverse popularity bias.** Every disease's top 10 became dominated by obscure plant compounds and traditional Chinese medicine ingredients. Examples:
+- Migraine #1 = corilagin (obscure tannin)
+- Tuberculosis #1 = ME1036 (experimental antibiotic)
+- Lyme #1 = Shuangshen (TCM formula)
+- **Corilagin appeared at #1 for Migraine, Fibromyalgia, AND Amnesia** — same obscure compound dominating completely unrelated diseases
+
+**Why:** marker/mechanism is dominated by the *same heavily-studied common drugs* (cyclosporine, methotrexate, etc.) as the therapeutic class. By using only m/m as negatives, the model learned "common, well-studied drugs = NEGATIVE for many diseases" and pushed them all out of every top-20. Obscure compounds with no m/m record floated up.
+
+### What mixing does
+
+50/50 and 25/75 mixes recover most baseline wins while still demoting the most obvious harmful drugs (cocaine for alcoholism, scopolamine for amnesia). But:
+- **Lyme #1 went from Cyclosporine (baseline) → Prednisone (25% mix) → Rifampin (50% mix).** 50% finally gets a real treatment, but at the cost of more degraded wins.
+- **Migraine baseline (Topiramate #1) is partially lost** — even 25% mix demotes it to "Gabapentin #1, Topiramate #?".
+
+### The real lesson
+
+**Hard-negative training has an irreducible trade-off:** more hard negatives → better safety on documented failures → degraded ranking on documented wins. There is no "free lunch" mix.
+
+Honest implication for the paper: hard negatives **complement but cannot replace** explicit harm filtering. The Perplexity structured-judge approach (Days 8-9 in the plan) directly addresses harm without disrupting the embedding-similarity rankings the model produces. They should be **layered, not substituted**.
+
+### Decision
+
+- **Do NOT ship a retrained model as production yet.** The trade-offs aren't acceptable for the user-facing app.
+- **Keep all variants in the repo** for the paper's experimental section.
+- **Move on to Perplexity structured judge (Days 8-9)** — that's the real safety mechanism.
+- **Revisit hard-negative training as a *complement* to Perplexity** in the final paper write-up.
+
+### Files
+
+- [scripts/retrain_with_hard_negatives.py](../scripts/retrain_with_hard_negatives.py) — `--hard-negative-fraction 0.0..1.0`, `--label NAME`
+- [scripts/diff_regression.py](../scripts/diff_regression.py) — side-by-side comparison with positive/negative drug watchlists per disease
+- `models/biolink_v2_hardneg.pt` (100%), `biolink_v2_hardneg-50.pt` (50%), `biolink_v2_hardneg-25.pt` (25%) — all variants saved
+- `data/temperature_hardneg*.json`, `data/val_logits_hardneg*.npy` — corresponding calibration
 
 ## Candidate-count finding (2026-05-01)
 
@@ -216,7 +271,7 @@ Before AND after every fix, run all 12 queries below and document top 20 + verdi
 |---|---|---|---|
 | ~~1~~ ✅ | Lock regression test suite — runner + baseline JSON saved | Done 2026-05-01 | No |
 | ~~2-3~~ ✅ | Baselines (popularity, cosine, random) on all 2526 diseases | Done 2026-05-01 — popularity at 0.88, MLP +6.7pts | No |
-| **4-7** | Hard-negative sampling **with evidence-strength filter** + retrain | Re-run regression suite. Failures improve; wins must not regress. Watch Amnesia's 951 Strong candidates — biggest test of whether hard negatives help cluster mismatch | **Yes — Day 7** (new model weights + retrained calibration) |
+| ~~4-7~~ ⚠️ | Hard-negative retraining (3 variants tried) | Done 2026-05-01 — found irreducible trade-off, NOT shipping. See "Hard-negative trade-off" section. | No (per finding) |
 | **8-9** | Structured Perplexity judge for harm + UI tier counts | Re-run regression. Verify naltrexone-fibro preserved. Tier breakdown header visible | **Yes — Day 9** (inference.py + ui/ changes) |
 | **10** | Discovery boost for UNKNOWN verdict + active trials + "show more" affordance | Naltrexone-fibro should move up; user can browse beyond top 20 | **Yes — Day 10** (inference.py + app.py changes) |
 | ~~11~~ ✅ | Inference-prior recalibration (score spread fix) | Done 2026-05-01 — moved up because impact was bigger than expected | Pending deploy with next wave |

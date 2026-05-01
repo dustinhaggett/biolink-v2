@@ -14,6 +14,8 @@ data/CTD_chemicals_diseases.tsv.gz
 # Validation artifacts (reproducible via scripts/)
 data/val_logits.npy
 data/val_labels.npy
+data/val_logits_*.npy
+data/val_labels_*.npy
 
 # IDE / OS
 .DS_Store
