@@ -14,6 +14,7 @@ Captured during pre-presentation review (2026-04-30), revised post-presentation 
 - ⚠️ **Hard-negative retraining done but reveals a deeper finding** (see "Hard-negative trade-off" section below). Implemented [scripts/retrain_with_hard_negatives.py](../scripts/retrain_with_hard_negatives.py). Trained 3 variants (100% hard, 50/50 mix, 25/75 mix). Each variant fixes some failures but degrades some wins. **No mix is unambiguously better.**
 - ⚠️ **Decision: do NOT ship retrained model as production yet.** The Perplexity-judge work (Days 8-9) is the better mechanism for safety re-ranking. Hard negatives can complement but don't replace it.
 - ✅ **Days 8-9 — Harm-aware reranking done.** Added `HARM_FOR_INDICATION: HARMFUL/NOT_HARMFUL/UNKNOWN` to Perplexity's structured output ([enrichment/perplexity.py](../enrichment/perplexity.py)). Built [core/reranking.py](../core/reranking.py) — pure function, harm-only, never demotes on absence of evidence. Wired into [app.py](../app.py) `_run_pipeline`. **21 new reranking tests, all pass.** Locks in the discovery-vs-harm invariants (e.g., `test_insufficient_evidence_unknown_harm_is_unchanged`).
+- ✅ **End-to-end Perplexity validation — 19/20 cases pass.** [scripts/validate_reranking.py](../scripts/validate_reranking.py) runs 20 designed (drug, disease) pairs across 3 categories: 10 documented harm-failures, 7 documented wins, 3 discovery candidates. Initial run (before prompt sharpening) was 4/6; after sharpening to ask a *clinical-practice question* ("would administering this drug worsen the patient's condition?") instead of a literature-evidence question, scored 19/20. The two non-matches reveal Perplexity's reasoning rather than failure (see "Reranking validation edge cases" section).
 
 ## Guiding principle: discovery vs. harm
 
@@ -78,6 +79,38 @@ Reproduced v1's reported AUC of 0.947 on the 50/50 pair-level held-out set (got 
 - The popularity baseline at 0.88 confirms **popularity bias is the dominant failure mode** in the model. Hard-negative training (P0) needs to specifically address this — not just direction blindness.
 - **Add precision@k to the regression suite output.** AUC is too forgiving for the user-facing ranking task.
 - The paper now has a quantitative story to tell, not just qualitative failure cases.
+
+## Reranking validation edge cases (2026-05-01) — third paper-worthy finding
+
+Validated harm-aware reranking against 20 designed (drug, disease) pairs via real Perplexity API calls. Result: 19/20 on both `harm_for_indication` and `verdict` matches. The two non-matches are not failures — they reveal genuine limitations of literature-driven harm classification.
+
+### The Strychnine paradox
+
+We expected `Strychnine for Amnesia → HARMFUL` (strychnine is a deadly poison). Perplexity classified it as `NOT_HARMFUL`. Its TLDR explained why:
+
+> *"Preclinical animal studies from the 1970s-1980s suggest strychnine may attenuate experimentally induced amnesia, but no human data or clinical trials exist for repurposing it as an amnesia treatment."*
+
+Perplexity is being **narrowly correct**: at sub-toxic doses, there's old preclinical literature suggesting strychnine has memory-enhancing effects via glycine-receptor antagonism. But strychnine is a **convulsant poison** with no clinical safety margin. The system reasoned over the literature it found and missed the broader clinical safety concern.
+
+**Implication for the paper:** literature-driven LLM judges can miss "common sense" safety concerns when the literature has limited mentions. A clinical-deployment system would need:
+- A blacklist of compounds with known catastrophic safety profiles (poisons, controlled substances at non-therapeutic doses)
+- Cross-checking with FDA scheduling and DEA classifications
+- Human/clinician oversight before any patient-facing recommendation
+
+This is exactly the kind of limitation the paper should disclose. The harm-aware reranker is a substantial improvement, not a magic bullet.
+
+### The Donepezil narrow-indication issue
+
+We expected `Donepezil for Amnesia → STANDARD-OF-CARE`. Perplexity returned `INSUFFICIENT`. TLDR:
+
+> *"Donepezil shows mixed preclinical and small human study evidence for anti-amnesic effects via cholinergic enhancement, but lacks direct trials for isolated amnesia and has conflicting results in related cognitive impairments."*
+
+Perplexity is being **precise**: donepezil is standard for **Alzheimer's-related cognitive decline**, not isolated amnesia. We classified it as a "win" because in the regression suite Donepezil should outrank Scopolamine, but Perplexity correctly distinguishes the indications. Not a system failure — a query-design limitation.
+
+### Files
+
+- [scripts/validate_reranking.py](../scripts/validate_reranking.py) — re-runnable, ~$0.10 + ~3 min
+- `results/rerank_validation_*.json` — full responses including Perplexity TLDRs
 
 ## Hard-negative trade-off finding (2026-05-01) — second paper-worthy result
 

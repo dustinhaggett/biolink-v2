@@ -27,17 +27,35 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# Designed test cases from the post-presentation failure documentation.
-# Each entry: (drug, disease, expected_harm, expected_verdict_one_of)
+# Designed test cases — each entry: (drug, disease, expected_harm, expected_verdict_one_of, category)
+# Category is informational; controls how cases are grouped in the report.
 CASES = [
-    # Documented direction-blindness failures — should now be flagged HARMFUL
-    ("Cocaine",            "Alcoholism",                                "harmful",     ["conflicts", "insufficient"]),
-    ("Cyclosporine",       "Lyme Disease",                              "harmful",     ["conflicts", "insufficient"]),
-    ("Scopolamine",        "Amnesia",                                   "harmful",     ["conflicts", "insufficient"]),
-    ("Streptozocin",       "Diabetes Mellitus, Type 2",                 "harmful",     ["conflicts", "insufficient"]),
-    # Documented wins — should be flagged SUPPORTS or STANDARD-OF-CARE, NOT HARMFUL
-    ("Naltrexone",         "Alcoholism",                                "not_harmful", ["supports", "standard-of-care"]),
-    ("Topiramate",         "Migraine Disorders",                        "not_harmful", ["supports", "standard-of-care"]),
+    # ── Direction-blindness failures (should now be flagged HARMFUL) ──
+    ("Cocaine",            "Alcoholism",                                "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Cyclosporine",       "Lyme Disease",                              "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Scopolamine",        "Amnesia",                                   "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Streptozocin",       "Diabetes Mellitus, Type 2",                 "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Nicotine",           "Sleep Initiation and Maintenance Disorders", "harmful",    ["conflicts", "insufficient"], "harm_fail"),
+    ("Nicotine",           "Migraine Disorders",                        "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Heroin",             "Alcoholism",                                "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Phencyclidine",      "Alcoholism",                                "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Methylprednisolone", "Lyme Disease",                              "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+    ("Strychnine",         "Amnesia",                                   "harmful",     ["conflicts", "insufficient"], "harm_fail"),
+
+    # ── Documented wins (should be SUPPORTS or STANDARD-OF-CARE, NOT HARMFUL) ──
+    ("Naltrexone",         "Alcoholism",                                "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Topiramate",         "Migraine Disorders",                        "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Doxycycline",        "Lyme Disease",                              "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Methotrexate",       "Arthritis, Rheumatoid",                     "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Pregabalin",         "Fibromyalgia",                              "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Tacrolimus",         "Dermatitis",                                "not_harmful", ["supports", "standard-of-care"], "win"),
+    ("Donepezil",          "Amnesia",                                   "not_harmful", ["supports", "standard-of-care"], "win"),
+
+    # ── Discovery candidates (emerging research, should be SUPPORTS or INSUFFICIENT, NOT HARMFUL) ──
+    # These are the "naltrexone-for-fibromyalgia" pattern — preserve, don't demote.
+    ("Naltrexone",         "Fibromyalgia",                              "not_harmful", ["supports", "insufficient", "conflicts"], "discovery"),
+    ("Aspirin",            "Colorectal Neoplasms",                      "not_harmful", ["supports", "standard-of-care"], "discovery"),
+    ("Sildenafil",         "Hypertension, Pulmonary",                   "not_harmful", ["supports", "standard-of-care"], "discovery"),
 ]
 
 
@@ -75,19 +93,23 @@ def main() -> None:
     print()
 
     rows = []
-    for drug, disease, exp_harm, exp_verdicts in CASES:
+    for drug, disease, exp_harm, exp_verdicts, category in CASES:
         t0 = time.time()
         ev = search_drug_disease(drug=drug, disease=disease)
         elapsed = time.time() - t0
 
         actual_harm = (ev.get("harm_for_indication") or "unknown").lower()
         actual_verdict = (ev.get("verdict") or "insufficient").lower()
-        harm_match = "✓" if actual_harm == exp_harm else "✗"
+        # For discovery candidates, "unknown" harm is also acceptable (preserves novel)
+        if category == "discovery" and actual_harm == "unknown":
+            harm_match = "✓"
+        else:
+            harm_match = "✓" if actual_harm == exp_harm else "✗"
         verdict_match = "✓" if actual_verdict in exp_verdicts else "✗"
 
-        print(f"[{datetime.now():%H:%M:%S}] {drug} for {disease}  ({elapsed:.1f}s)")
+        print(f"[{datetime.now():%H:%M:%S}] [{category:9s}] {drug} for {disease}  ({elapsed:.1f}s)")
         print(f"    expected harm:    {exp_harm:<12s}  actual: {actual_harm:<12s} {harm_match}")
-        print(f"    expected verdict: {'/'.join(exp_verdicts):<25s}  actual: {actual_verdict:<25s} {verdict_match}")
+        print(f"    expected verdict: {'/'.join(exp_verdicts):<35s}  actual: {actual_verdict:<25s} {verdict_match}")
         print(f"    tldr: {ev.get('tldr') or '(none)'}")
         if ev.get("error"):
             print(f"    ⚠️  error: {ev['error']}")
@@ -96,6 +118,7 @@ def main() -> None:
         rows.append({
             "drug": drug,
             "disease": disease,
+            "category": category,
             "expected_harm": exp_harm,
             "actual_harm": actual_harm,
             "expected_verdict_one_of": exp_verdicts,
@@ -110,35 +133,37 @@ def main() -> None:
             "full_evidence": ev,
         })
 
-    # Validate the reranker on a synthetic top-6 list using these verdicts
-    print(f"\n[{datetime.now():%H:%M:%S}] Reranker simulation:")
+    # Validate the reranker on a synthetic equal-prob list using these verdicts
+    print(f"\n[{datetime.now():%H:%M:%S}] Reranker simulation (synthetic equal-prob inputs):")
     synthetic_results = []
-    # Synthetic equal probabilities so rerank effects are clearly visible
-    for i, (drug, disease, _, _) in enumerate(CASES, start=1):
+    for i, (drug, disease, _, _, _) in enumerate(CASES, start=1):
         ev = next(r["full_evidence"] for r in rows if r["drug"] == drug and r["disease"] == disease)
         synthetic_results.append({
             "drug": drug,
-            "disease_for_query": disease,  # not standard but useful for clarity
-            "proba": 0.5,  # All start equal
+            "disease_for_query": disease,
+            "proba": 0.5,
             "rank": i,
             "evidence": ev,
             "clinical_trials": [],
         })
 
     reranked = apply_evidence_reranking(synthetic_results)
-    print(f"  Before rerank (rank order = test case order):")
-    for r in synthetic_results:
-        print(f"    #{r['rank']}  {r['drug']:<15s} for {r['disease_for_query']:<35s}  proba={r['proba']:.3f}")
-    print(f"\n  After rerank:")
+    print(f"\n  After rerank (sorted by reranked_proba desc):")
     for r in reranked:
-        print(f"    #{r['rank']}  {r['drug']:<15s} for {r['disease_for_query']:<35s}  proba={r['proba']:.3f} → {r['reranked_proba']:.3f}  ({r['rerank_reason']})")
+        print(f"    #{r['rank']:>2}  {r['drug']:<20s} for {r['disease_for_query']:<48s}  → {r['reranked_proba']:.3f}  ({r['rerank_reason']})")
 
-    # Summary
+    # Summary by category
+    print(f"\n=== Summary by category ===")
+    by_cat: dict[str, list[dict]] = {}
+    for r in rows:
+        by_cat.setdefault(r["category"], []).append(r)
+    for cat, rs in by_cat.items():
+        n_harm = sum(1 for r in rs if r["harm_match"])
+        n_verdict = sum(1 for r in rs if r["verdict_match"])
+        print(f"  [{cat:10s}]  harm: {n_harm}/{len(rs)}   verdict: {n_verdict}/{len(rs)}")
     n_harm_ok = sum(1 for r in rows if r["harm_match"])
     n_verdict_ok = sum(1 for r in rows if r["verdict_match"])
-    print(f"\n=== Summary ===")
-    print(f"  HARM_FOR_INDICATION matches expectation: {n_harm_ok}/{len(rows)}")
-    print(f"  VERDICT matches one of expected:         {n_verdict_ok}/{len(rows)}")
+    print(f"  TOTAL                harm: {n_harm_ok}/{len(rows)}   verdict: {n_verdict_ok}/{len(rows)}")
 
     output = {
         "metadata": {
