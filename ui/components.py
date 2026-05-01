@@ -219,6 +219,14 @@ def render_tier_summary(
     Strong candidates that the top-20 cutoff hides. See "Candidate-count finding"
     in docs/POST_PRESENTATION_TODO.md.
 
+    For RARE diseases with limited CTD coverage (0 Strong + 0 Moderate), the
+    model genuinely doesn't know — every candidate scores below the noise floor
+    after prior correction. We show an explicit notice so users don't think the
+    system is broken; they should trust the evidence-layer badges (Standard of
+    Care / Evidence Supports) below over the model's tier. ACTH Deficiency is
+    the canonical example — 3 therapeutic pairs in CTD, model has thin signal,
+    Prednisolone correctly flagged Standard of Care by Perplexity.
+
     Backwards compatible: silently no-ops if inference didn't return tier_counts
     (e.g., older cached results).
     """
@@ -252,6 +260,26 @@ def render_tier_summary(
         f'</div>',
         unsafe_allow_html=True,
     )
+
+    # Low-confidence notice: model has thin training signal for this disease.
+    # Defer to the evidence layer rather than hide the results.
+    if strong == 0 and moderate == 0:
+        st.markdown(
+            '<div style="margin: 0 0 1rem; padding: 0.6rem 0.85rem; '
+            'background: #fffbeb; border-radius: 0.5rem; '
+            'border: 1px solid #fcd34d; border-left: 3px solid #d97706;">'
+            '<div style="font-size: 0.82rem; color: #78350f; line-height: 1.5;">'
+            '<strong>⚠️ Limited model signal for this disease.</strong> '
+            'No candidates score above the model\'s noise floor — likely a rare '
+            'condition with sparse training data in CTD. '
+            '<strong>Trust the evidence-layer badges</strong> '
+            '(<span style="color:#1a56db; font-weight:600;">Standard of Care</span>, '
+            '<span style="color:#1b7a3d; font-weight:600;">Evidence Supports</span>) '
+            'on individual results below over the model\'s confidence tier — '
+            'the evidence layer is most valuable when the model is least informative.'
+            '</div></div>',
+            unsafe_allow_html=True,
+        )
 
 
 # ── Result Card ───────────────────────────────────────────────
