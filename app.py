@@ -258,11 +258,18 @@ def _run_pipeline(query: str):
         st.write("Generating plain-English explanations...")
         results = run_explanations(results, output["ctd_entity"], top_n=10)
 
-        # Step 4: Evidence search (top 5)
-        st.write("Searching for published evidence...")
-        results = run_evidence_search(results, output["ctd_entity"], top_n=5)
+        # Step 4: Evidence search (top 20 — every visible result gets a verdict).
+        # Was top_n=5, but production observation showed harm cases at ranks 6-20
+        # weren't being demoted (Strychnine #10 for Amnesia, Methylprednisolone
+        # at Lyme #5+) and discovery candidates at rank 6+ weren't getting boosted
+        # (Naltrexone #6 for Fibromyalgia). Bumping to 20 makes every visible
+        # candidate eligible for rerank. Cost: ~$0.10/query vs ~$0.025/query.
+        st.write("Searching for published evidence (top 20)...")
+        results = run_evidence_search(results, output["ctd_entity"], top_n=20)
 
-        # Step 5: Harm-aware re-ranking (only the enriched top-N — others preserve order).
+        # Step 5: Harm-aware re-ranking. Now that every visible result has a
+        # verdict, the rerank can correctly demote harm cases and boost discovery
+        # candidates throughout the displayed list — not just the top 5.
         # See core/reranking.py and docs/POST_PRESENTATION_TODO.md for the design.
         st.write("Re-ranking for indication-specific safety...")
         from core.reranking import apply_evidence_reranking

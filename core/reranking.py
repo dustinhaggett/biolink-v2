@@ -104,8 +104,19 @@ def _multiplier(result: dict, config: RerankConfig) -> tuple[float, str]:
     if verdict == VERDICT_SUPPORTS:
         return config.boost_supports, "evidence supports"
 
-    # Rule 3: Discovery boost for unstudied candidates with active trial activity
-    if verdict in (VERDICT_INSUFFICIENT, "", "unknown") and _has_active_trials(result):
+    # Rule 3: Discovery boost for unstudied candidates with active trial activity.
+    # Important guard: skip if has_interactions=True. Without this, drugs like
+    # methamphetamine for alcoholism get boosted because Perplexity sometimes
+    # classifies clearly-dangerous combos as INSUFFICIENT-not-HARMFUL (its harm
+    # field is sensitive to specific phrasing like "contraindicated"), while
+    # correctly flagging the dangerous interaction. The interactions flag is a
+    # second layer of safety for when the primary harm classification misses.
+    # See docs/POST_PRESENTATION_TODO.md "Reranking validation edge cases".
+    if (
+        verdict in (VERDICT_INSUFFICIENT, "", "unknown")
+        and _has_active_trials(result)
+        and not has_interactions
+    ):
         return config.boost_unknown_with_trials, "active trials, no established verdict"
 
     # Default — preserve. CONFLICTS without harm is preserved (mixed evidence,

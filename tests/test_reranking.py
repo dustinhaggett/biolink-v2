@@ -151,6 +151,21 @@ class TestDiscoveryBoost:
         out = apply_evidence_reranking(results)
         assert out[0]["reranked_proba"] == pytest.approx(0.20)
 
+    def test_drug_interactions_blocks_discovery_boost(self):
+        """Methamphetamine-for-alcoholism pattern: Perplexity classifies harm
+        as UNKNOWN (the field is sensitive to phrasing) but correctly flags
+        Drug Interactions. Without this guard, the discovery boost fires and
+        promotes a clearly-dangerous combo. Interactions=True is a backstop."""
+        results = [_result(
+            "MethForAlcoholism", 0.93, 1,
+            verdict=VERDICT_INSUFFICIENT, harm=HARM_UNKNOWN,
+            interactions=True,  # The safety backstop
+            trials=[{"id": "NCT_ACTIVE", "status": "RECRUITING"}],
+        )]
+        out = apply_evidence_reranking(results)
+        assert out[0]["reranked_proba"] == pytest.approx(0.93)  # No boost
+        assert "active trials" not in out[0]["rerank_reason"].lower()
+
 
 # ---------------------------------------------------------------------------
 # Re-ranking behavior (sort, ranks, original_rank tracking)
