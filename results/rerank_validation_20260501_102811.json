@@ -1,0 +1,205 @@
+{
+  "metadata": {
+    "timestamp": "2026-05-01T10:28:46",
+    "n_cases": 6,
+    "n_harm_matches": 4,
+    "n_verdict_matches": 6
+  },
+  "cases": [
+    {
+      "drug": "Cocaine",
+      "disease": "Alcoholism",
+      "expected_harm": "harmful",
+      "actual_harm": "harmful",
+      "expected_verdict_one_of": [
+        "conflicts",
+        "insufficient"
+      ],
+      "actual_verdict": "insufficient",
+      "tldr": "No evidence supports repurposing cocaine for alcoholism treatment; instead, alcohol use worsens cocaine outcomes, and standard alcoholism drug disulfiram reduces cocaine use.",
+      "evidence_quality": "Preclinical",
+      "has_interactions": true,
+      "harm_match": true,
+      "verdict_match": true,
+      "elapsed_seconds": 5.7,
+      "error": null,
+      "full_evidence": {
+        "summary": "1. **Mechanism**: No proposed mechanism exists for cocaine treating alcoholism. Conversely, alcohol increases cocaine cravings via enhanced dopamine signaling in reward pathways, promoting cocaine relapse in alcohol users.[3][4]\n\n2. **Key studies**: No studies test cocaine for alcoholism. Related findings show disulfiram (alcoholism drug) inhibits aldehyde dehydrogenase, reducing cocaine use independently of alcohol effects in dual users (e.g., Petrakis et al., 2004, trials in PMC[2]; Cochrane review of 13 studies, 1191 participants, 2016[5]).\n\n3. **Clinical trials**: None identified for cocaine treating alcoholism. Trials exist for disulfiram in cocaine dependence (e.g., completed studies showing modest abstinence benefits[5]) and other agents like modafinil/naltrexone for dual cocaine-alcohol[8].\n\n4. **Evidence strength**: Insufficient\u2014zero preclinical, human, or trial evidence for cocaine in alcoholism; evidence only shows bidirectional harm (alcohol triggers cocaine relapse[4], cocaine co-use complicates alcohol recovery[3]).\n\n5. **Interactions**: Disulfiram (Antabuse, standard for alcoholism) combined with cocaine risks severe cardiovascular toxicity; cocaine worsens outcomes in alcohol-dependent patients.[1][2]",
+        "verdict": "insufficient",
+        "harm_for_indication": "harmful",
+        "tldr": "No evidence supports repurposing cocaine for alcoholism treatment; instead, alcohol use worsens cocaine outcomes, and standard alcoholism drug disulfiram reduces cocaine use.",
+        "evidence_quality": "Preclinical",
+        "pathway": "Cocaine -> dopamine transporter blockade -> mesolimbic reward pathway activation -> increased alcohol cravings and relapse risk",
+        "has_interactions": true,
+        "citations": [
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC2861803/",
+          "https://clinicaltrials.gov/study/NCT00142818"
+        ],
+        "error": null
+      }
+    },
+    {
+      "drug": "Cyclosporine",
+      "disease": "Lyme Disease",
+      "expected_harm": "harmful",
+      "actual_harm": "not_harmful",
+      "expected_verdict_one_of": [
+        "conflicts",
+        "insufficient"
+      ],
+      "actual_verdict": "insufficient",
+      "tldr": "No direct evidence supports repurposing Cyclosporine for Lyme Disease treatment; limited use is reported only for immune-mediated complications in veterinary or rare human cases, not the infection itself[4][5].",
+      "evidence_quality": "Case Report",
+      "has_interactions": false,
+      "harm_match": false,
+      "verdict_match": true,
+      "elapsed_seconds": 6.8,
+      "error": null,
+      "full_evidence": {
+        "summary": "1. **Mechanism**: Cyclosporine inhibits calcineurin, blocking T-cell activation and IL-2 production, which suppresses immune responses in autoimmune or inflammatory conditions; no evidence of direct antibacterial activity against *Borrelia burgdorferi*, the Lyme pathogen[1][3][6][8]. It may address immune-mediated sequelae like glomerulonephritis or vasculitis, but Lyme requires antibiotics[2][4][5].  \n\n2. **Key studies**: One human case report (2023, *International Journal of Immunopathology and Immunotherapy*) described cyclosporine providing satisfactory but side-effect-prone response for persistent urticarial vasculitis after Lyme arthritis resolved with doxycycline; methotrexate was more effective long-term[4]. Veterinary reports suggest it for immune-mediated Lyme nephritis post-antibiotics[5]. No studies test it against Lyme infection.  \n\n3. **Clinical trials**: None identified for Cyclosporine in Lyme Disease; standard Lyme trials focus on antibiotics like doxycycline combinations[2].  \n\n4. **Evidence strength**: Very weak\u2014isolated case reports and veterinary suggestions for complications, no preclinical, human studies, or trials for Lyme treatment itself[4][5].  \n\n5. **Interactions**: N/A (marked NO above); no evidence of dangerous interactions with Lyme standards like doxycycline or ceftriaxone[2][9].",
+        "verdict": "insufficient",
+        "harm_for_indication": "not_harmful",
+        "tldr": "No direct evidence supports repurposing Cyclosporine for Lyme Disease treatment; limited use is reported only for immune-mediated complications in veterinary or rare human cases, not the infection itself[4][5].",
+        "evidence_quality": "Case Report",
+        "pathway": "Cyclosporine -> Calcineurin -> Inhibition of IL-2 production and T-cell activation -> Suppression of immune-mediated inflammation (not anti-bacterial)[1][3][6][8]",
+        "has_interactions": false,
+        "citations": [
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC11842607/"
+        ],
+        "error": null
+      }
+    },
+    {
+      "drug": "Scopolamine",
+      "disease": "Amnesia",
+      "expected_harm": "harmful",
+      "actual_harm": "unknown",
+      "expected_verdict_one_of": [
+        "conflicts",
+        "insufficient"
+      ],
+      "actual_verdict": "insufficient",
+      "tldr": "Scopolamine induces amnesia and impairs memory as a muscarinic antagonist, with no evidence supporting its repurposing to treat amnesia.",
+      "evidence_quality": "Human Study",
+      "has_interactions": false,
+      "harm_match": false,
+      "verdict_match": true,
+      "elapsed_seconds": 5.0,
+      "error": null,
+      "full_evidence": {
+        "summary": "HARMFUL_FOR_INDICATION: HARMFUL  \n\n1. **Mechanism**: Scopolamine antagonizes muscarinic acetylcholine receptors, blocking cholinergic neurotransmission essential for memory formation and recall, thereby inducing amnesia rather than alleviating it.[1][2] No pathways suggest therapeutic benefit for amnesia.  \n\n2. **Key studies**: A 2018 mouse study (Frontiers in Pharmacology) used scopolamine to induce amnesia, reversed by genistein via cholinergic enhancement and neuroprotection, confirming scopolamine's amnestic effect.[1] A meta-analysis of 46 human studies (PMC, recent) showed scopolamine impairs memory tasks (e.g., delayed recall) and attention, especially via injection.[2]  \n\n3. **Clinical trials**: An early-phase 1 trial (WithPower) tests scopolamine's effects on memory-related brain activity in epileptic patients, using it to mimic memory loss, not treat it; no trials for amnesia treatment identified.[3]  \n\n4. **Evidence strength**: Human studies and preclinical models consistently show scopolamine causes amnesia, but no evidence supports treatment use; repurposing lacks any supporting data.[1][2][3]  \n\n5. **Interactions**: N/A (standard amnesia treatments like cholinesterase inhibitors would be antagonized by scopolamine's mechanism, but no specific dangerous interactions documented).[2]",
+        "verdict": "insufficient",
+        "harm_for_indication": "unknown",
+        "tldr": "Scopolamine induces amnesia and impairs memory as a muscarinic antagonist, with no evidence supporting its repurposing to treat amnesia.",
+        "evidence_quality": "Human Study",
+        "pathway": "Scopolamine -> muscarinic receptor antagonist -> cholinergic neurotransmission blockade -> memory impairment",
+        "has_interactions": false,
+        "citations": [
+          "https://www.frontiersin.org/journals/pharmacology/articles/10.3389/fphar.2018.01153/full",
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC12041729/"
+        ],
+        "error": null
+      }
+    },
+    {
+      "drug": "Streptozocin",
+      "disease": "Diabetes Mellitus, Type 2",
+      "expected_harm": "harmful",
+      "actual_harm": "harmful",
+      "expected_verdict_one_of": [
+        "conflicts",
+        "insufficient"
+      ],
+      "actual_verdict": "insufficient",
+      "tldr": "Streptozocin is widely used to chemically induce type 2 diabetes in animal models by destroying pancreatic \u03b2-cells but has no evidence supporting its repurposing as a treatment for the disease.",
+      "evidence_quality": "Preclinical",
+      "has_interactions": false,
+      "harm_match": true,
+      "verdict_match": true,
+      "elapsed_seconds": 5.1,
+      "error": null,
+      "full_evidence": {
+        "summary": "1. **Mechanism**: Streptozocin does not work against type 2 diabetes mellitus (T2DM); it induces it by selectively entering pancreatic \u03b2-cells via the GLUT2 glucose transporter, alkylating DNA, and causing \u03b2-cell death, leading to insulin deficiency and hyperglycemia.[1][3][4][5][6] Low doses (25-65 mg/kg) combined with high-fat diet mimic T2DM insulin resistance and partial \u03b2-cell loss in rodents.[2][3][4]\n\n2. **Key studies**: No studies support repurposing streptozocin for T2DM treatment; all describe its use to induce diabetes. Examples include high-fat diet + low-dose streptozocin in mice to model T2DM (PubMed 28395380, 2017)[2], multiple low-dose protocols after high-fat diet for T2DM in rodents (PMC8568204, 2021)[3], and low-dose (25-45 mg/kg) + high-fat diet for \u03b2-cell dysfunction (Creative Biolabs review)[4].\n\n3. **Clinical trials**: No ongoing or completed clinical trials of streptozocin for treating T2DM; it is an antineoplastic agent (investigational) and experimental diabetogen, not a therapeutic candidate.[6][7]\n\n4. **Evidence strength**: Preclinical only (rodent/nonhuman primate models for diabetes induction); no human treatment data, rendering repurposing unsupported.[1][2][3][4][5]\n\n5. **Interactions**: Not applicable (NO above).",
+        "verdict": "insufficient",
+        "harm_for_indication": "harmful",
+        "tldr": "Streptozocin is widely used to chemically induce type 2 diabetes in animal models by destroying pancreatic \u03b2-cells but has no evidence supporting its repurposing as a treatment for the disease.",
+        "evidence_quality": "Preclinical",
+        "pathway": "Streptozocin -> Pancreatic \u03b2-cell GLUT2 transporter -> DNA alkylation and \u03b2-cell destruction -> hyperglycemia/diabetes induction",
+        "has_interactions": false,
+        "citations": [
+          "https://pubmed.ncbi.nlm.nih.gov/28395380/",
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC8568204/",
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC10043433/",
+          "https://go.drugbank.com/drugs/DB00428",
+          "https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/cpz1.78"
+        ],
+        "error": null
+      }
+    },
+    {
+      "drug": "Naltrexone",
+      "disease": "Alcoholism",
+      "expected_harm": "not_harmful",
+      "actual_harm": "not_harmful",
+      "expected_verdict_one_of": [
+        "supports",
+        "standard-of-care"
+      ],
+      "actual_verdict": "standard-of-care",
+      "tldr": "Naltrexone is an established FDA-approved treatment for alcohol use disorder that reduces cravings and heavy drinking by blocking opioid receptors.[1][2][3][6]",
+      "evidence_quality": "RCT",
+      "has_interactions": false,
+      "harm_match": true,
+      "verdict_match": true,
+      "elapsed_seconds": 4.8,
+      "error": null,
+      "full_evidence": {
+        "summary": "1. **Mechanism**: Naltrexone is an opioid antagonist that binds to opioid receptors in the brain, blocking the pleasurable effects of alcohol and reducing dopamine release, which diminishes cravings and the rewarding \"buzz\" from drinking. This makes it easier to abstain or limit intake, unlike disulfiram which causes sickness.[1][2][3][7]  \n\n2. **Key studies**: A 16-week RCT (pre-COM BINE) showed naltrexone 100 mg daily increased abstinence days (80.6% vs. 75.1% placebo) and reduced heavy drinking risk (66.2% vs. 73.1%).[2] Meta-analyses and Cochrane reviews confirm superiority over placebo in preventing relapse to heavy drinking and boosting abstinence days.[2] 2001 studies reported 78% of Sinclair Method users (naltrexone pre-drinking) stopped or rarely drank.[3]  \n\n3. **Clinical trials**: Multiple completed RCTs support efficacy; COMBINE study (post-2000s) reinforced benefits with medical management.[2] No specific ongoing trials detailed, but guidelines endorse use up to 1 year or longer with monitoring.[4]  \n\n4. **Evidence strength**: Strong, based on large RCTs, meta-analyses, Cochrane reviews, and FDA approval as standard pharmacotherapy alongside behavioral support; relapse rates remain 40-60% at 1 year post-treatment.[2][4]  \n\n5. **Interactions**: N/A (no dangerous interactions with standard AUD treatments like acamprosate or disulfiram noted).[2]",
+        "verdict": "standard-of-care",
+        "harm_for_indication": "not_harmful",
+        "tldr": "Naltrexone is an established FDA-approved treatment for alcohol use disorder that reduces cravings and heavy drinking by blocking opioid receptors.[1][2][3][6]",
+        "evidence_quality": "RCT",
+        "pathway": "Naltrexone -> opioid receptors -> reduced dopamine release and reward from alcohol -> decreased cravings and heavy drinking[1][2][3][7]",
+        "has_interactions": false,
+        "citations": [
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC2565602/",
+          "https://www.mayoclinic.org/drugs-supplements/naltrexone-oral-route/description/drg-20068408"
+        ],
+        "error": null
+      }
+    },
+    {
+      "drug": "Topiramate",
+      "disease": "Migraine Disorders",
+      "expected_harm": "not_harmful",
+      "actual_harm": "not_harmful",
+      "expected_verdict_one_of": [
+        "supports",
+        "standard-of-care"
+      ],
+      "actual_verdict": "standard-of-care",
+      "tldr": "Topiramate is FDA-approved and widely used as a standard preventive treatment for episodic and chronic migraine, reducing migraine frequency by 50% or more in many patients.[2][3][4]",
+      "evidence_quality": "RCT",
+      "has_interactions": false,
+      "harm_match": true,
+      "verdict_match": true,
+      "elapsed_seconds": 6.6,
+      "error": null,
+      "full_evidence": {
+        "summary": "1. **Mechanism**: Topiramate modulates neuronal excitability through multiple actions, including sodium channel blockade, enhancement of GABA activity, inhibition of glutamate receptors, and carbonic anhydrase inhibition, collectively reducing genetically driven brain hyperexcitability that triggers migraines.[1][3][7]  \n\n2. **Key studies**:  \n   - Brandes et al. (2004, JAMA): RCT showed topiramate 100-200 mg/day reduced monthly migraine frequency from ~5.5 to 3.3 vs placebo (4.6); 50-54% achieved \u226550% reduction.[2]  \n   - Meta-analysis (TheNNT): 9 RCTs (1737 patients) found 1.2 fewer attacks/month, 24% higher responder rate (>50% reduction) vs placebo.[6]  \n   - Study in chronic migraine: Topiramate equivalent to onabotulinumtoxinA in reducing headache days, though with more side effects.[3][4]  \n\n3. **Clinical trials**: Multiple completed RCTs support efficacy for episodic and chronic migraine prophylaxis, leading to FDA approval; topiramate is established standard-of-care, not repurposed.[2][3][4][6] No ongoing trials highlighted as novel repurposing.  \n\n4. **Evidence strength**: Strong, based on large RCTs, meta-analyses, and FDA approval for migraine prevention; consistent guidelines endorse it despite side effects like paresthesia and fatigue.[2][3][5][6]  \n\n5. **Interactions**: No known dangerous interactions with standard migraine treatments (e.g., triptans, beta-blockers, CGRP inhibitors) reported in sources.[1-8]",
+        "verdict": "standard-of-care",
+        "harm_for_indication": "not_harmful",
+        "tldr": "Topiramate is FDA-approved and widely used as a standard preventive treatment for episodic and chronic migraine, reducing migraine frequency by 50% or more in many patients.[2][3][4]",
+        "evidence_quality": "RCT",
+        "pathway": "Topiramate -> multiple targets (Na+ channels, GABA enhancement, glutamate inhibition, carbonic anhydrase) -> reduces brain hyperexcitability -> prevents migraine attacks[1][3][7]",
+        "has_interactions": false,
+        "citations": [
+          "https://pubmed.ncbi.nlm.nih.gov/27122361/",
+          "https://pubmed.ncbi.nlm.nih.gov/15096395/",
+          "https://headachejournal.onlinelibrary.wiley.com/doi/10.1111/head.12826"
+        ],
+        "error": null
+      }
+    }
+  ]
+}

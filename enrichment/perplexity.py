@@ -30,14 +30,25 @@ EVIDENCE_QUALITY: [pick ONE: RCT | Human Study | Preclinical | Case Report | The
 PATHWAY: {drug} -> [molecular target] -> [pathway/mechanism] -> [disease effect]
 INTERACTIONS: [YES or NO — does {drug} have known dangerous interactions with standard treatments for {disease}?]
 
-Important: HARM_FOR_INDICATION is about THIS specific drug-disease combination, NOT general drug toxicity:
-  - HARMFUL = published evidence shows {drug} actively WORSENS {disease}, INDUCES it, or is contraindicated
-              for patients with {disease} (e.g., nicotine for migraine, cyclosporine for Lyme,
-              streptozocin for diabetes, scopolamine for amnesia).
-  - NOT_HARMFUL = no evidence of indication-specific harm — drug is either neutral or beneficial here.
-              (A drug being generally toxic at high doses is NOT_HARMFUL if there's no specific
-              evidence it harms patients with {disease}.)
-  - UNKNOWN = insufficient data to assess indication-specific harm one way or the other.
+Important: HARM_FOR_INDICATION asks a clinical-practice question, not a literature-evidence question:
+"If a clinician administered {drug} to a patient WHO HAS {disease}, would the patient likely be harmed,
+or their condition worsened, based on the drug's known mechanism, pharmacology, or contraindications?"
+
+  - HARMFUL = yes, the patient would likely be harmed. This includes:
+      * Drug pharmacologically worsens the disease (e.g., nicotine vasoconstriction worsens migraine).
+      * Drug INDUCES the disease in research/clinical use (e.g., scopolamine induces amnesia,
+        streptozocin induces diabetes — these are HARMFUL even if no clinical trial tested them
+        as a TREATMENT for the disease they cause).
+      * Drug is contraindicated for the disease class (e.g., immunosuppressants like cyclosporine
+        in active bacterial infection — would worsen Lyme, even if no direct trial exists).
+      * Drug interacts dangerously with standard treatment for {disease}.
+  - NOT_HARMFUL = no — the drug would not specifically harm a patient with {disease}, based on
+      mechanism and known evidence. (General drug toxicity at high doses is NOT_HARMFUL if there's
+      no indication-specific concern.)
+  - UNKNOWN = insufficient data to reason about patient outcomes for this combination.
+
+If the drug's KNOWN MECHANISM would predictably worsen {disease}, classify HARMFUL even without a
+direct clinical trial confirming harm.
 
 Then provide:
 1. **Mechanism**: How might {drug} work against {disease}? What biological pathways are involved?
