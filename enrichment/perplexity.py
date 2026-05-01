@@ -24,10 +24,20 @@ I'm researching whether the drug **{drug}** could be repurposed to treat **{dise
 Start your response with these structured lines (one per line):
 
 VERDICT: [pick ONE: SUPPORTS | STANDARD-OF-CARE | CONFLICTS | INSUFFICIENT]
+HARM_FOR_INDICATION: [pick ONE: HARMFUL | NOT_HARMFUL | UNKNOWN]
 TLDR: [one-sentence summary of the key finding]
 EVIDENCE_QUALITY: [pick ONE: RCT | Human Study | Preclinical | Case Report | Theoretical]
 PATHWAY: {drug} -> [molecular target] -> [pathway/mechanism] -> [disease effect]
 INTERACTIONS: [YES or NO — does {drug} have known dangerous interactions with standard treatments for {disease}?]
+
+Important: HARM_FOR_INDICATION is about THIS specific drug-disease combination, NOT general drug toxicity:
+  - HARMFUL = published evidence shows {drug} actively WORSENS {disease}, INDUCES it, or is contraindicated
+              for patients with {disease} (e.g., nicotine for migraine, cyclosporine for Lyme,
+              streptozocin for diabetes, scopolamine for amnesia).
+  - NOT_HARMFUL = no evidence of indication-specific harm — drug is either neutral or beneficial here.
+              (A drug being generally toxic at high doses is NOT_HARMFUL if there's no specific
+              evidence it harms patients with {disease}.)
+  - UNKNOWN = insufficient data to assess indication-specific harm one way or the other.
 
 Then provide:
 1. **Mechanism**: How might {drug} work against {disease}? What biological pathways are involved?
@@ -159,7 +169,36 @@ def _parse_interactions(text: str) -> bool:
     return False
 
 
-_STRUCTURED_PREFIXES = ("VERDICT:", "TLDR:", "EVIDENCE_QUALITY:", "PATHWAY:", "INTERACTIONS:")
+_HARM_NORMALIZE = {
+    "harmful": "harmful",
+    "not_harmful": "not_harmful",
+    "not-harmful": "not_harmful",
+    "not harmful": "not_harmful",
+    "unknown": "unknown",
+}
+
+
+def _parse_harm_for_indication(text: str) -> str:
+    """Extract indication-specific harm flag.
+
+    Used by core.reranking to demote candidates known to harm THIS disease.
+    Defaults to 'unknown' (no demotion) on missing/unparseable values to
+    preserve the discovery-vs-harm principle: never demote on absence of
+    evidence.
+    """
+    match = re.search(
+        r"HARM_FOR_INDICATION:\s*(HARMFUL|NOT_HARMFUL|NOT-HARMFUL|NOT HARMFUL|UNKNOWN)",
+        text,
+        re.IGNORECASE,
+    )
+    if match:
+        return _HARM_NORMALIZE.get(match.group(1).lower(), "unknown")
+    return "unknown"
+
+
+_STRUCTURED_PREFIXES = (
+    "VERDICT:", "HARM_FOR_INDICATION:", "TLDR:", "EVIDENCE_QUALITY:", "PATHWAY:", "INTERACTIONS:",
+)
 
 
 def _clean_summary(text: str) -> str:
@@ -229,6 +268,7 @@ def search_drug_disease(drug: str, disease: str) -> dict:
 
         citations = _filter_citations(data.get("citations", []))
         verdict = _parse_verdict(raw_text)
+        harm_for_indication = _parse_harm_for_indication(raw_text)
         tldr = _parse_tldr(raw_text)
         evidence_quality = _parse_evidence_quality(raw_text)
         pathway = _parse_pathway(raw_text)
@@ -238,6 +278,7 @@ def search_drug_disease(drug: str, disease: str) -> dict:
         return {
             "summary": summary or None,
             "verdict": verdict,
+            "harm_for_indication": harm_for_indication,
             "tldr": tldr,
             "evidence_quality": evidence_quality,
             "pathway": pathway,
@@ -255,10 +296,11 @@ def search_drug_disease(drug: str, disease: str) -> dict:
 
 
 def _empty_evidence(error: str | None = None) -> dict:
-    """Return an empty evidence dict."""
+    """Return an empty evidence dict (insufficient + unknown harm = preserve)."""
     return {
-        "summary": None, "verdict": "insufficient", "tldr": None,
-        "evidence_quality": "Unknown", "pathway": None,
+        "summary": None, "verdict": "insufficient",
+        "harm_for_indication": "unknown",
+        "tldr": None, "evidence_quality": "Unknown", "pathway": None,
         "has_interactions": False, "citations": [], "error": error,
     }
 

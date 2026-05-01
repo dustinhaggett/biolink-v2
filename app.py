@@ -259,6 +259,12 @@ def _run_pipeline(query: str):
         st.write("Searching for published evidence...")
         results = run_evidence_search(results, output["ctd_entity"], top_n=5)
 
+        # Step 5: Harm-aware re-ranking (only the enriched top-N — others preserve order).
+        # See core/reranking.py and docs/POST_PRESENTATION_TODO.md for the design.
+        st.write("Re-ranking for indication-specific safety...")
+        from core.reranking import apply_evidence_reranking
+        results = apply_evidence_reranking(results)
+
         status.update(label="Analysis complete", state="complete", expanded=False)
 
     # Store results and switch state
