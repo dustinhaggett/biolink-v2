@@ -1,0 +1,206 @@
+{
+  "metadata": {
+    "timestamp": "2026-05-01T09:51:38",
+    "n_diseases_evaluated": 12,
+    "n_diseases_skipped": 0,
+    "n_drugs": 7164,
+    "n_therapeutic_pairs_in_ctd": 39516,
+    "task": "per-disease ranking AUC: rank all drugs for each disease, positives = CTD therapeutic indications"
+  },
+  "aggregated": {
+    "model": {
+      "auc_mean": 0.9213736161035179,
+      "auc_median": 0.9309667555900962,
+      "auc_std": 0.04868955074365974,
+      "auc_p25": 0.9036488390084468,
+      "auc_p75": 0.9461780714406359,
+      "ap_mean": 0.25581008443274694,
+      "ap_median": 0.21878026556270774
+    },
+    "cosine": {
+      "auc_mean": 0.816511524556866,
+      "auc_median": 0.8368387313854494,
+      "auc_std": 0.07665587374831671,
+      "auc_p25": 0.7733465301616396,
+      "auc_p75": 0.8569796806085234,
+      "ap_mean": 0.13843173080830784,
+      "ap_median": 0.08364833745159506
+    },
+    "popularity": {
+      "auc_mean": 0.803717095743143,
+      "auc_median": 0.8060428066921407,
+      "auc_std": 0.08005762323875602,
+      "auc_p25": 0.763371289175441,
+      "auc_p75": 0.8372965786278834,
+      "ap_mean": 0.0732147959934624,
+      "ap_median": 0.06614924731840166
+    },
+    "random": {
+      "auc_mean": 0.510926770313591,
+      "auc_median": 0.5102924890507128,
+      "auc_std": 0.05434050272093194,
+      "auc_p25": 0.48097903815523724,
+      "auc_p75": 0.5384273336788882,
+      "ap_mean": 0.008980228959319428,
+      "ap_median": 0.00854831302081012
+    }
+  },
+  "per_disease": {
+    "Fibromyalgia": {
+      "n_pos": 13,
+      "n_neg": 7151,
+      "skipped": false,
+      "model_auc": 0.9468498219721825,
+      "model_ap": 0.2836280970388471,
+      "cosine_auc": 0.856243881974549,
+      "cosine_ap": 0.19848598877198695,
+      "popularity_auc": 0.8332078353753645,
+      "popularity_ap": 0.01196819699022434,
+      "random_auc": 0.5083742994524704,
+      "random_ap": 0.002282751899903475
+    },
+    "Dermatitis": {
+      "n_pos": 18,
+      "n_neg": 7146,
+      "skipped": false,
+      "model_auc": 0.8828948595951115,
+      "model_ap": 0.05203912677552499,
+      "cosine_auc": 0.7218101812980067,
+      "cosine_ap": 0.026505015899084695,
+      "popularity_auc": 0.7640093914233292,
+      "popularity_ap": 0.06852259608104225,
+      "random_auc": 0.5867151786547252,
+      "random_ap": 0.0035297553130605773
+    },
+    "Migraine Disorders": {
+      "n_pos": 80,
+      "n_neg": 7084,
+      "skipped": false,
+      "model_auc": 0.9260243153585546,
+      "model_ap": 0.26960537956559605,
+      "cosine_auc": 0.8591870765104462,
+      "cosine_ap": 0.18740328405861792,
+      "popularity_auc": 0.780855625352908,
+      "popularity_ap": 0.08623900384801558,
+      "random_auc": 0.4262934076792772,
+      "random_ap": 0.01008314651606965
+    },
+    "Arthritis, Rheumatoid": {
+      "n_pos": 95,
+      "n_neg": 7069,
+      "skipped": false,
+      "model_auc": 0.9359091958216379,
+      "model_ap": 0.5156824970984542,
+      "cosine_auc": 0.8449389848932701,
+      "cosine_ap": 0.261648676819297,
+      "popularity_auc": 0.7844554801914958,
+      "popularity_ap": 0.1907448017374715,
+      "random_auc": 0.5050397956980441,
+      "random_ap": 0.015449725304579534
+    },
+    "Tuberculosis": {
+      "n_pos": 33,
+      "n_neg": 7131,
+      "skipped": false,
+      "model_auc": 0.9057125737815682,
+      "model_ap": 0.40577337204413283,
+      "cosine_auc": 0.786667686541477,
+      "cosine_ap": 0.35571359992507284,
+      "popularity_auc": 0.6929326925119942,
+      "popularity_ap": 0.030688858359572874,
+      "random_auc": 0.4374455535583007,
+      "random_ap": 0.004236769048525217
+    },
+    "Asthma": {
+      "n_pos": 97,
+      "n_neg": 7067,
+      "skipped": false,
+      "model_auc": 0.9196001744714434,
+      "model_ap": 0.4393398182648693,
+      "cosine_auc": 0.8319384856870689,
+      "cosine_ap": 0.3499817798162714,
+      "popularity_auc": 0.7614569824317761,
+      "popularity_ap": 0.1320277502118678,
+      "random_auc": 0.5210306652526117,
+      "random_ap": 0.014900063103162997
+    },
+    "Lyme Disease": {
+      "n_pos": 2,
+      "n_neg": 7162,
+      "skipped": false,
+      "model_auc": 0.9987433677743647,
+      "model_ap": 0.2222222222222222,
+      "cosine_auc": 0.9827562133482267,
+      "cosine_ap": 0.014361300075585788,
+      "popularity_auc": 0.9857581681094667,
+      "popularity_ap": 0.014134452102687045,
+      "random_auc": 0.44121753700083777,
+      "random_ap": 0.00040400964845746187
+    },
+    "Diabetes Mellitus, Type 2": {
+      "n_pos": 79,
+      "n_neg": 7085,
+      "skipped": false,
+      "model_auc": 0.8974576346890828,
+      "model_ap": 0.21533830890319325,
+      "cosine_auc": 0.7333830610221274,
+      "cosine_ap": 0.026283795614557456,
+      "popularity_auc": 0.8276301331927856,
+      "popularity_ap": 0.10817256852509394,
+      "random_auc": 0.5122106786489553,
+      "random_ap": 0.011139436806013288
+    },
+    "Alcoholism": {
+      "n_pos": 33,
+      "n_neg": 7131,
+      "skipped": false,
+      "model_auc": 0.9435116839407963,
+      "model_ap": 0.12898387025774216,
+      "cosine_auc": 0.8617835910641969,
+      "cosine_ap": 0.05609433995660479,
+      "popularity_auc": 0.8349502598556027,
+      "popularity_ap": 0.039716969198794624,
+      "random_auc": 0.528269654899861,
+      "random_ap": 0.005443390752896406
+    },
+    "Sleep Initiation and Maintenance Disorders": {
+      "n_pos": 48,
+      "n_neg": 7116,
+      "skipped": false,
+      "model_auc": 0.9612668634064081,
+      "model_ap": 0.1805352961946245,
+      "cosine_auc": 0.7976274124039723,
+      "cosine_ap": 0.01740631385942519,
+      "popularity_auc": 0.8443355349447255,
+      "popularity_ap": 0.06377589855576107,
+      "random_auc": 0.6013912310286678,
+      "random_ap": 0.009914084056970224
+    },
+    "Attention Deficit Disorder with Hyperactivity": {
+      "n_pos": 43,
+      "n_neg": 7121,
+      "skipped": false,
+      "model_auc": 0.9459541545967871,
+      "model_ap": 0.1988858246435485,
+      "cosine_auc": 0.8417389770838299,
+      "cosine_ap": 0.05751016792339225,
+      "popularity_auc": 0.8688794688490968,
+      "popularity_ap": 0.062067097661671074,
+      "random_auc": 0.5689003700159698,
+      "random_ap": 0.007182541984650013
+    },
+    "Amnesia": {
+      "n_pos": 170,
+      "n_neg": 6994,
+      "skipped": false,
+      "model_auc": 0.792558747834278,
+      "model_ap": 0.15768720018420823,
+      "cosine_auc": 0.6800627428552205,
+      "cosine_ap": 0.10978650697979785,
+      "popularity_auc": 0.6661335766791703,
+      "popularity_ap": 0.07051935864934662,
+      "random_auc": 0.4942328718733704,
+      "random_ap": 0.023197073077544286
+    }
+  }
+}
