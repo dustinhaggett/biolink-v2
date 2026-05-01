@@ -27,3 +27,6 @@ data/val_labels_*.npy
 
 # Archive
 *.zip
+
+# Internal working notes (not for public repo)
+docs/POST_PRESENTATION_TODO.md
