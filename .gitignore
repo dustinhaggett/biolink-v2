@@ -36,9 +36,9 @@ data/val_labels_*.npy
 # Claude Code local config
 .claude/
 
-# Local-only documentation / generators (not part of submission)
-docs/SLIDE_DESIGN.md
-docs/create_final_presentation.py
+# Local-only documentation source / generators (the PDF and pptx are the deliverables)
+docs/*.md
+docs/*.py
 
 # Archive
 *.zip
