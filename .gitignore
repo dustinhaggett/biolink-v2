@@ -36,9 +36,11 @@ data/val_labels_*.npy
 # Claude Code local config
 .claude/
 
-# Local-only documentation source / generators (the PDF and pptx are the deliverables)
+# Local-only documentation source, generators, and editable presentation files
+# (the PDF / docx / mp4 in docs/ are the deliverables)
 docs/*.md
 docs/*.py
+docs/*.pptx
 
 # Archive
 *.zip
