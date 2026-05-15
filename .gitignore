@@ -42,5 +42,9 @@ docs/*.md
 docs/*.py
 docs/*.pptx
 
+# Root-level working docs (canonical versions live in docs/)
+/*.pptx
+/*.docx
+
 # Archive
 *.zip
