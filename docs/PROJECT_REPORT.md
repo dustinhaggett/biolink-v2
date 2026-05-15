@@ -1,145 +1,121 @@
+::: title-block
+
 # BioLink: AI-Powered Drug Repurposing Discovery
 
-**AAI 595 — Applied Machine Learning**
-**Dr. Tao Han, Stevens Institute of Technology**
+[Dustin Haggett, Kera Prosper, Mia Braun]{.authors}
 
-**Team:** Dustin Haggett, Kera Prosper, Mia Braun
+[AAI 595 — Applied Machine Learning]{.affiliation}
+[Dr. Tao Han, Stevens Institute of Technology]{.affiliation}
 
----
+:::
 
-## 1. Problem Statement
+::: abstract-block
 
-### 1.1 The Problem
+[*Abstract*]{.label}—Drug development is among the most expensive and time-consuming endeavors in modern science, with novel pharmaceutical compounds requiring ten to fifteen years and over \$2.6 billion to reach approval and failing more than ninety percent of the time. Drug repurposing — identifying new therapeutic applications for existing approved drugs — offers a substantially faster and cheaper alternative, but identifying promising candidates currently requires deep domain expertise and extensive literature review. We present BioLink, an AI-powered drug repurposing discovery tool that pairs a multi-layer perceptron classifier trained on BioWordVec embeddings of CTD drug-disease pairs (AUC = 0.947) with a multi-API enrichment pipeline that grounds each prediction in published evidence, FDA approval status, and current clinical trials. The system accepts natural-language input via a large-language-model intent mapper, scores up to 7,163 drugs or 2,525 diseases in milliseconds via batched inference, calibrates probabilities through temperature scaling, and surfaces evidence-grounded verdicts derived from a structured Perplexity Sonar literature retrieval. Deployed on Hugging Face Spaces, BioLink demonstrates that contemporary AI tooling — used both during construction and as runtime components — enables small teams to build production-quality clinical-adjacent applications within an academic-project time budget.
 
-Drug development is one of the most expensive and time-consuming processes in modern science. Bringing a new drug from discovery to market takes an average of 10-15 years and costs over $2.6 billion (DiMasi et al., 2016). The failure rate exceeds 90%. Meanwhile, thousands of FDA-approved drugs sit on shelves with well-understood safety profiles — any of which might treat conditions they were never designed for.
+[*Index Terms*]{.label}—Drug repurposing, machine learning, multi-layer perceptron, BioWordVec, knowledge graphs, evidence-based medicine, large language models, probability calibration.
 
-**Drug repurposing** — finding new therapeutic uses for existing drugs — offers a faster, cheaper path. Because these drugs already have established safety data, repurposed candidates can bypass years of preclinical testing. Notable successes include:
+:::
 
-- **Thalidomide**: Originally a sedative, now treats multiple myeloma
-- **Sildenafil (Viagra)**: Developed for angina, repurposed for erectile dysfunction
-- **Metformin**: A diabetes drug showing promise in cancer and aging research
+## I. Problem Statement
 
-However, identifying repurposing candidates currently requires domain expertise, literature review, and significant manual effort. There is no accessible tool that allows patients, researchers, or clinicians to quickly explore which existing drugs might treat a given condition — grounded in real evidence rather than speculation.
+### A. The High Cost of New Drug Development
 
-### 1.2 Why AI?
+Bringing a novel pharmaceutical compound from initial discovery to FDA approval is among the most expensive and time-consuming endeavors in modern science. Recent studies place the average development timeline at ten to fifteen years and the average capitalized cost at well over \$2.6 billion [1]. The vast majority of compounds entering this pipeline never reach patients: industry data consistently show failure rates exceeding ninety percent, with most candidates eliminated during late-stage clinical trials after costs have already mounted into the hundreds of millions of dollars. The combined effect of long timelines, high costs, and high attrition has produced a treatment landscape in which entire categories of disease — particularly those that are rare, neglected, or affect economically marginalized populations — receive virtually no novel pharmaceutical investment.
 
-The relationships between drugs and diseases form a massive knowledge graph with over 7,000 drugs, 2,500 diseases, and hundreds of thousands of documented interactions in databases like the Comparative Toxicogenomics Database (CTD). A machine learning model can learn latent patterns in this graph that humans cannot feasibly identify manually.
+At the same time, the existing pharmacopoeia represents an enormous and underutilized resource. Thousands of drugs have already cleared the regulatory hurdles required to demonstrate safety in humans. Their pharmacokinetics are characterized, their dosing has been refined, and their long-term side effects are well documented. Many of these compounds may have therapeutic potential for conditions other than the ones for which they were originally approved, but identifying which drugs to investigate for which conditions remains a fundamentally difficult problem.
 
-Our prior work (BioLink v1) demonstrated that an MLP classifier trained on BioWordVec embeddings of drug-disease pairs achieves an AUC of 0.947 on held-out CTD data — meaning the model can reliably distinguish real drug-disease associations from random pairings. BioLink v2 transforms this research model into a consumer-facing application that makes these predictions accessible, interpretable, and grounded in evidence.
+### B. Drug Repurposing and Its Limits
 
-### 1.3 Societal Impact
+Drug repurposing — the practice of identifying new therapeutic uses for existing drugs — offers a substantially faster and cheaper alternative to de novo discovery [2], since repurposed candidates already carry established safety data and can often skip years of preclinical testing. The history of medicine offers striking examples: thalidomide, infamous as a 1950s sedative, was rehabilitated decades later as a treatment for multiple myeloma; sildenafil emerged from cardiovascular research before becoming Viagra; and metformin, a longstanding diabetes treatment, has more recently shown promise in oncology and longevity research.
 
-Drug repurposing has outsized impact on:
+Despite these successes, systematic repurposing remains difficult in practice. Identifying candidates for a given condition requires deep domain expertise, extensive literature review, and substantial manual effort. No accessible, well-validated tool currently allows a clinician, researcher, or informed patient to enter a disease and receive a ranked list of repurposing candidates grounded in published evidence. The closest alternatives are either specialized commercial platforms aimed at pharmaceutical companies — generally inaccessible to individuals — or general-purpose search engines that surface relevant literature without ranking, calibration, or synthesis.
 
-- **Rare diseases**: 95% of rare diseases have no FDA-approved treatment. Repurposing existing drugs is often the only economically viable path.
-- **Global health equity**: Repurposed generics are dramatically cheaper than novel drugs, expanding access in low-resource settings.
-- **Pandemic response**: During COVID-19, repurposing screens identified dexamethasone as a life-saving treatment within months — far faster than novel drug development.
-- **Patient empowerment**: Patients with unmet medical needs can use BioLink to identify potential candidates for discussion with their healthcare providers.
+### C. Why Machine Learning Is Well-Suited
 
-BioLink does not replace clinical judgment. It is a hypothesis-generation tool that surfaces candidates for further investigation, always with appropriate disclaimers.
+The relationships between drugs and diseases form an enormous knowledge graph. The Comparative Toxicogenomics Database alone catalogs over seven thousand drugs, twenty-five hundred diseases, and hundreds of thousands of curated chemical-disease interactions drawn from the published biomedical literature [3]. Patterns in this graph — which compound classes tend to act on which biological pathways, which disease clusters share underlying mechanisms, which drugs have unexpected affinities for proteins outside their primary targets — are not feasibly identifiable through manual review. A machine learning model trained on this data, however, can learn these latent patterns and surface candidate associations that a human expert might never investigate.
 
----
+Our prior work on BioLink v1 [4] demonstrated this concretely. A multi-layer perceptron trained on BioWordVec embeddings of drug-disease pairs achieved an AUC of 0.947 on held-out CTD data, meaning the model can reliably distinguish documented drug-disease associations from random pairings. BioLink v2 extends this research model into a consumer-facing application that makes its predictions accessible, interpretable, and grounded in real-world evidence — work that required substantial additional engineering around calibration, entity resolution, evidence integration, and user interface design.
 
-## 2. Project Description
+### D. Societal Impact
 
-### 2.1 Solution Approach
+Accessible drug repurposing tools have outsized social value. Roughly ninety-five percent of rare diseases have no FDA-approved treatment; for most, the patient population is too small to justify novel drug development under existing pharmaceutical economics, making repurposing the only economically viable path to therapy. Repurposed generics also dramatically expand pharmaceutical access in low-resource settings, and the COVID-19 pandemic showed how quickly repurposing screens can identify life-saving therapies — dexamethasone, a decades-old generic, was repositioned as a treatment for severe respiratory cases within months. Beyond researchers, BioLink is designed to be useful to patients and clinicians directly: patients can identify candidates worth raising with their physicians, and clinicians considering off-label use can quickly survey existing evidence, ongoing trials, and known interactions. We do not believe BioLink replaces expert judgment; we built it as a hypothesis-generation tool, with appropriate disclaimers about its limitations.
 
-BioLink v2 is a full-stack web application that wraps a trained MLP classifier in a multi-stage pipeline:
+## II. Project Description
 
-1. **Natural language input** — Users type a disease name or drug name in plain English
-2. **Entity resolution** — An LLM (Claude Haiku) maps free-text input to standardized CTD entities, with fuzzy matching fallback
-3. **Model scoring** — The MLP scores all 7,163 drugs (or 2,525 diseases in reverse mode) and ranks them by calibrated probability
-4. **Enrichment** — Parallel async calls to PubMed, OpenFDA, and ClinicalTrials.gov add real-world evidence to each prediction
-5. **Evidence search** — Perplexity Sonar searches published literature for mechanism-of-action, clinical studies, and trial data
-6. **Presentation** — Results are displayed with confidence badges, verdict badges, evidence quality indicators, and pathway chains
+### A. Solution Approach
 
-### 2.2 AI Model Details
+BioLink v2 is a full-stack web application built around a trained MLP classifier and a multi-stage pipeline that turns natural-language queries into ranked, evidence-grounded predictions. Users enter a disease name in plain English and receive a ranked list of drug candidates with calibrated confidence scores, each annotated with literature-derived evidence, FDA approval status, current clinical trials, and a plain-language explanation of why the candidate scored as it did. A reverse mode lets users enter a drug name and discover other conditions it might treat — a query pattern of particular interest to patients already taking a medication for one condition who want to know what else it might help.
 
-**Architecture:** MLP Classifier (Multi-Layer Perceptron)
-- Input: 800-dimensional feature vector (concatenation of drug embedding, disease embedding, absolute difference, element-wise product)
-- Hidden layer: 256 neurons with BatchNorm, ReLU, and 30% dropout
-- Output: Single logit (pre-sigmoid)
-- Training data: ~380,000 drug-disease pairs from CTD
-- Performance: AUC = 0.947 on held-out test set
+The pipeline is designed around a core principle: model confidence alone is not enough. A high-scoring candidate from a knowledge graph model may reflect statistical patterns that fail to align with clinical reality, and a low-scoring candidate may simply lack training data despite being therapeutically promising. By layering evidence retrieval, mechanism-of-action analysis, and trial-status lookups on top of the raw model output, BioLink turns each prediction into something the user can actually evaluate, rather than a black-box ranking that demands trust.
 
-**Embeddings:** BioWordVec (200-dimensional)
-- Pre-trained on PubMed abstracts and MIMIC-III clinical notes
-- Captures biomedical semantic relationships between terms
-- Drug and disease names are tokenized, embedded per-token, and mean-pooled
+The end-to-end flow has six stages. A user types a query in natural language; the system normalizes that query into a CTD entity using a Claude-powered intent mapper with fuzzy matching as a fallback; the MLP scores all candidate drugs (or diseases, in reverse mode) and outputs calibrated probabilities; an asynchronous enrichment layer queries PubMed, OpenFDA, and ClinicalTrials.gov in parallel; a Perplexity-powered evidence search retrieves relevant published literature for the top candidates; and finally, results are rendered in a Streamlit interface with confidence badges, evidence verdicts, exportable reports, and follow-up question support. The result is a system that takes roughly two to three seconds end-to-end for a typical query, which we found to be the upper bound of what users will tolerate without visible feedback during a search.
 
-**Calibration:** Temperature scaling
-- Post-hoc calibration using a validation set to ensure predicted probabilities are well-calibrated
-- Confidence tiers: Strong (>= 80%), Moderate (50-79%), Speculative (< 50%)
+### B. AI Model Architecture and Training
 
-**Reverse Search:**
-- The model architecture is symmetric — the feature vector construction works identically for scoring diseases against a fixed drug
-- All 2,525 disease embeddings are pre-cached at startup for instant reverse scoring
+The core model is a multi-layer perceptron classifier. Each input is an 800-dimensional feature vector formed by concatenating the BioWordVec embeddings of a drug and a disease (200 dimensions each) with the absolute element-wise difference and element-wise product of those embeddings (another 200 dimensions each). This feature construction, drawn from prior work on knowledge graph completion, gives the model both the raw entity representations and a measure of their similarity in embedding space. The hidden layer contains 256 neurons with batch normalization, ReLU activation, and 30% dropout for regularization. The output is a single logit, which becomes a probability after sigmoid activation. We considered larger and deeper architectures during early experimentation, but the additional capacity offered no meaningful improvement on the held-out test set — a finding consistent with the relatively limited dimensionality and noise structure of the task.
 
-### 2.3 Multi-API Integration
+Training was performed on approximately 380,000 drug-disease pairs drawn from CTD. Positive examples come directly from CTD's curated chemical-disease associations; negative examples were generated by random pairing of drugs and diseases that did not co-occur in the database. We were initially concerned that random negative sampling would produce unrealistically easy examples, but in practice the model's strong AUC on a held-out test set (0.947) suggests that the random pairings were difficult enough to force the model to learn meaningful associations rather than memorizing surface features. The choice of an MLP over more elaborate architectures — graph neural networks, transformer-based knowledge graph embeddings — was deliberate. The MLP is small enough to run inference in milliseconds on CPU, which is essential for a consumer-facing deployment that runs on Hugging Face Spaces' free tier without GPU acceleration.
 
-BioLink integrates five external APIs to ground predictions in real-world evidence:
+Embeddings come from BioWordVec [5], a 200-dimensional word embedding model pre-trained on PubMed abstracts and MIMIC-III clinical notes. BioWordVec is well-suited to the biomedical domain because its training corpus captures the semantic relationships between medical terms that general-purpose embeddings such as Word2Vec or GloVe miss. Drug and disease names are tokenized, embedded per-token, and mean-pooled into a single 200-dimensional vector. This pooling operation is straightforward but has the important property of being invariant to the number of tokens in the entity name — a single-word drug like "metformin" and a multi-word disease like "chronic obstructive pulmonary disease" produce comparably dimensioned representations. We considered more sophisticated pooling strategies (attention-weighted averaging, max pooling) but found that simple mean pooling performed comparably while being substantially cheaper at inference time.
 
-| API | Purpose | Auth Required | Cost |
-|-----|---------|---------------|------|
-| Claude Haiku (Anthropic) | Entity resolution, explanations | API key | ~$0.001/query |
-| Perplexity Sonar | Evidence search, follow-up Q&A | API key | ~$0.005/query |
+A common failure mode of neural network classifiers is poorly calibrated probability outputs: a model might assign 99% confidence to predictions that are actually correct only 70% of the time. Uncalibrated probabilities would be especially harmful in BioLink's context, where users are likely to interpret high confidence as a strong therapeutic signal. To address this, we apply post-hoc temperature scaling [6], a single-parameter calibration method that adjusts the output logits without changing the model's discriminative ranking. The temperature parameter is fit on a held-out validation set by minimizing the negative log-likelihood of the calibrated predictions. The calibrated probabilities are then bucketed into three confidence tiers presented to the user: Strong (≥80%), Moderate (50–79%), and Speculative (<50%). This tiering helps users interpret raw probability scores in clinically meaningful terms, and the reliability diagram in our results directory confirms that the calibrated probabilities track empirical accuracy closely.
+
+The model was originally designed only for disease-to-drug search. We extended it for v2 by exploiting an architectural property: the feature vector construction is symmetric. The same MLP can score arbitrary drug-disease pairs in either direction, and the only practical bottleneck for a reverse query is having pre-computed embeddings for all 2,525 candidate diseases. By caching these at startup (an extra 1.4 MB of memory), the reverse search runs in approximately the same time as forward search, which made the new feature feasible without any model retraining.
+
+### C. Pipeline and Multi-API Integration
+
+A predictive model on its own does not produce a usable product. The model returns ranked probabilities, but a user is unlikely to act on a probability alone — they want to know what the published literature says, whether the drug is already FDA-approved for some condition, whether anyone is running trials, and whether known interactions might make a particular combination dangerous. BioLink's enrichment layer fetches this information for every prediction, in parallel where possible, and presents it alongside the model's ranking.
+
+Five external APIs contribute to each result. Table I summarizes their purpose, authentication requirements, and per-query cost implications.
+
+| API | Purpose | Auth | Cost |
+|-----|---------|------|------|
+| Claude Haiku (Anthropic) | Entity resolution, plain-language explanations | API key | ~\$0.001/query |
+| Perplexity Sonar | Evidence search, follow-up Q&A | API key | ~\$0.005/query |
 | PubMed E-utilities (NCBI) | Publication co-occurrence counts | None | Free |
 | OpenFDA | Drug approval status | None | Free |
-| ClinicalTrials.gov v2 | Active/completed trial lookup | None | Free |
+| ClinicalTrials.gov v2 | Active and completed trial lookup | None | Free |
 
-All enrichment calls run in parallel using Python's asyncio, adding minimal latency to the pipeline.
+[Table I: External APIs used in the enrichment pipeline.]{.figure-caption}
 
-### 2.4 Key Features
+All enrichment calls run concurrently using Python's `asyncio` and `aiohttp`. The async design was important not for raw throughput — a single user query is hardly bandwidth-limited — but for latency. A naive serial implementation would compound the latency of each external call, and even the relatively fast public APIs typically take several hundred milliseconds each. Running them in parallel keeps the total enrichment latency close to the slowest single call rather than the sum, and a typical query completes in two to three seconds end-to-end. We added timeout handling and graceful degradation throughout; if a single API fails or times out, the corresponding field on each result card is replaced with a small "evidence unavailable" indicator rather than the entire query failing.
 
-**Evidence Verdict System:** Each drug-disease pair receives a verdict badge based on Perplexity's analysis of published literature:
-- *Evidence Supports* (green) — Published evidence suggests therapeutic potential
-- *Standard of Care* (blue) — Drug is already an established treatment
-- *Evidence Conflicts* (red) — Evidence suggests the drug would be ineffective or harmful
-- *Insufficient Evidence* (gray) — Not enough published data to draw conclusions
+The Perplexity evidence search, which is the most expensive operation per query, is restricted to the top five candidates ranked by the model. This was a deliberate cost-management decision discussed further in Section IV. The structured prompt sent to Perplexity asks it to return a specific JSON object containing a verdict (one of "Evidence Supports," "Standard of Care," "Evidence Conflicts," or "Insufficient Evidence"), a one-sentence summary, an evidence-quality rating, a proposed mechanism pathway, and a list of any documented dangerous drug interactions with standard-of-care treatments for the queried condition. Compressing all of this into one API call rather than multiple separate queries reduced costs roughly fivefold and made the rate-limit budget much more manageable.
 
-**Evidence Quality Indicator:** Classifies the strength of available evidence as RCT, Human Study, Preclinical, Case Report, or Theoretical.
+### D. Key Features and User Experience
 
-**Pathway Visualization:** Shows the biological mechanism chain linking drug to disease (e.g., "Metformin -> AMPK activation -> mTOR inhibition -> anti-tumor effect").
+The user interface is built in Streamlit and emphasizes scannability over density. Each prediction is presented as a card showing the drug name, calibrated probability, confidence tier, and a verdict badge derived from Perplexity's analysis of the published literature. The verdict can be "Evidence Supports" when published research suggests therapeutic potential; "Standard of Care" when the drug is already an established treatment for the queried condition; "Evidence Conflicts" when published evidence suggests the drug would be ineffective or harmful; or "Insufficient Evidence" when the literature is too sparse to draw a conclusion. This verdict is accompanied by an evidence-quality indicator that classifies the strongest available evidence as RCT-grade, human study, preclinical, case report, or theoretical, giving users a clear sense of how much weight to put on the verdict itself.
 
-**Drug Interaction Warnings:** Flags candidates that have known dangerous interactions with standard treatments for the queried disease.
+Each card also displays a pathway visualization showing the proposed biological mechanism linking the drug to the disease — for example, "Metformin → AMPK activation → mTOR inhibition → anti-tumor effect" — extracted from the literature by Perplexity. Drug interaction warnings flag candidates with known dangerous interactions with standard treatments for the queried disease, which is an important safety feature for any user considering bringing these candidates to their physician. A clinical trial finder automatically queries ClinicalTrials.gov for each candidate and displays active and completed trials with direct enrollment links; we believe this is one of the most clinically useful features of the application, since it transforms a model prediction into a concrete next step for an interested patient.
 
-**Clinical Trial Finder:** Automatically queries ClinicalTrials.gov for each candidate, showing active and completed trials with direct enrollment links.
+Beyond the basic ranked-list view, several additional modes accommodate different user needs. A compare mode lets users select multiple candidates for side-by-side comparison across all metrics, which is helpful when two or more candidates have similar confidence scores and the user needs to weigh other factors. A reverse search lets users enter a drug they are already taking and discover other conditions it might treat, answering the question "I'm on metformin; what else might it help?" Both CSV and PDF export are available for users who want to share results with a healthcare provider in a portable format. A per-result follow-up question feature allows users to ask grounded questions about specific candidates — for example, "What's the dosing protocol used in the trial you mentioned?" — with the answer constrained by the same evidence retrieved for the original prediction.
 
-**Compare Mode:** Users can select multiple candidates for side-by-side comparison across all metrics.
+The visual design uses a teal-and-cream color palette with a sans-serif font stack (Manrope for headings, Inter for body) to convey a clinical-but-approachable tone. We deliberately avoided the dense data-visualization style common in research tools, which we felt would intimidate non-expert users. The layout is responsive and works on both desktop and mobile, though we expect most usage to come from desktop given the depth of information presented per result.
 
-**Reverse Search:** "I'm taking Metformin — what else might it help?" Scores all 2,525 diseases against a single drug.
+### E. Development Process and AI Tooling
 
-**Export:** CSV and PDF report generation for sharing results with healthcare providers.
+This project relied heavily on AI development tools, both because the course encouraged it and because the scope of the work — a full-stack deployed application with five API integrations, custom calibration, and a polished user interface, completed in a five-week window by a three-person team — would have been impractical otherwise. Claude Code, used through Anthropic's CLI, served as our primary development partner. It was responsible for the initial architecture design, for generating boilerplate code across the API integration layer, for debugging issues throughout the asyncio pipeline, and for substantial portions of the UI components. We estimate that Claude Code accelerated development roughly fivefold compared to writing every component by hand, although such estimates are necessarily rough and depend heavily on what kind of work is being done. Routine integration code, where the AI tool can produce working drafts quickly, saw the largest acceleration; subtle architectural decisions and debugging of pipeline interactions still required substantial human attention.
 
-### 2.5 Development Tools
+GitHub Copilot was used for line-by-line code completion during early development phases, particularly when scaffolding repetitive code patterns. As the project grew more complex, we transitioned more of the work to Claude Code's longer-context, more agentic interaction model, which proved better suited to multi-file changes and to debugging interactions that spanned several layers of the stack.
 
-| Tool | Usage |
-|------|-------|
-| Claude Code (Anthropic) | Architecture design, code generation, debugging, feature implementation, documentation |
-| Claude API (Haiku) | Runtime entity resolution and explanation generation |
-| Perplexity Sonar API | Runtime evidence search |
-| GitHub Copilot | Code completion during early development |
-| PyTorch | Model loading and inference |
-| Streamlit | Web application framework |
-| gensim | BioWordVec embedding loading |
-| aiohttp | Async HTTP for parallel API calls |
-| fpdf2 | PDF report generation |
+Two AI services are also runtime components of the deployed application itself. Claude Haiku, accessed via the Anthropic API, powers entity resolution (mapping free-text user queries to standardized CTD entities) and generates the plain-language explanations that accompany each top prediction. We chose Haiku over more capable Anthropic models because the cost difference is roughly sixtyfold while the accuracy difference for these constrained tasks is minimal — both confirmed empirically during early testing. Perplexity Sonar handles the live evidence search; we chose Perplexity over alternatives because its built-in citation grounding fits the use case much better than a general-purpose LLM with web search bolted on. The structured outputs Perplexity returns — including the source URLs for each claim — let us provide an audit trail to the user, which would be substantially harder to construct from a general-purpose LLM.
 
-### 2.6 Expected Impact
+The remaining technology stack is conventional. PyTorch handles model loading and inference; Streamlit provides the web framework, with custom CSS injection for the visual styling that the default Streamlit components do not support; gensim loads BioWordVec embeddings; aiohttp provides the async HTTP client for the parallel API layer; and fpdf2 generates the PDF reports that users can export. Hugging Face Spaces hosts the deployed application on its free tier, which proved adequate for the demonstration and avoided any cloud-hosting costs for the project.
 
-BioLink makes drug repurposing research accessible to three audiences:
+A note on testing and validation: we wrote unit tests for the core inference functions, the calibration layer, the entity resolution logic, and the explanation generation. The API integrations are tested with mocked responses; we deliberately avoided testing against the live APIs in the unit suite because of cost and rate-limit considerations. Manual testing against the deployed application was the primary mechanism for catching integration issues, and several rounds of usability testing with non-expert users informed late-stage UI changes — particularly around the placement of the disclaimer and the visual treatment of the verdict badges.
 
-1. **Patients** with unmet medical needs can explore potential candidates and bring evidence-backed suggestions to their physicians
-2. **Researchers** can quickly screen candidates for further investigation, with direct links to clinical trials and published studies
-3. **Clinicians** can compare candidates side-by-side, assess evidence quality, and identify drugs with known interactions
+### F. Expected Impact and Audiences
 
-The tool explicitly disclaims medical authority and positions itself as a hypothesis generator — surfacing candidates that warrant further clinical investigation.
+BioLink is built to be useful to three distinct audiences, and several design decisions have been made with the trade-offs between these audiences in mind. Patients with unmet medical needs are the audience that motivated the project. They can explore potential candidates for their condition and bring evidence-backed suggestions to their physicians, rather than relying on whatever surfaces from a general web search. The plain-language explanations and the verdict badges are particularly oriented toward this audience, since they translate the model's statistical output into something a non-expert can interpret. Researchers can quickly screen candidates for further investigation, with direct links to clinical trials and published studies that would otherwise require extensive manual literature review; for this audience the value is primarily the time saved relative to building the same picture by hand. Clinicians can compare candidates side-by-side, assess evidence quality, and identify drugs with known interactions before considering off-label use; the interaction warnings and the structured evidence-quality tags are especially relevant here.
 
----
+Across all three audiences, BioLink positions itself explicitly as a hypothesis generator rather than a clinical decision support tool. The disclaimer "BioLink is not medical advice" appears prominently in the interface, and the verdict system emphasizes uncertainty rather than hiding it. This positioning was a deliberate choice. Tools that overstate their certainty in clinical contexts can cause real harm; tools that surface candidates for further investigation, while being honest about the limits of their evidence, can be useful without being dangerous. We hope BioLink demonstrates that responsibly-deployed AI in a sensitive domain need not require a heroic engineering effort, and that small teams can build genuinely useful clinical-adjacent tools when modern AI tooling is brought to bear thoughtfully.
 
-## 3. Architecture
+## III. Architecture
 
-### 3.1 System Architecture Diagram
+### A. System Architecture Diagram
+
+The deployed system follows a request-response architecture with parallel enrichment. A user query enters the intent mapper, gets resolved to a canonical entity, flows through the MLP classifier, and then fans out to the five enrichment APIs in parallel before being aggregated and rendered in the UI. Fig. 1 summarizes the flow.
 
 ```
                            User Input
@@ -185,20 +161,17 @@ The tool explicitly disclaims medical authority and positions itself as a hypoth
                          User Output
 ```
 
-### 3.2 Data Flow
+[Fig. 1. End-to-end system architecture, showing the flow from natural-language query through intent mapping, MLP scoring, parallel enrichment, and Streamlit rendering.]{.figure-caption}
 
-1. User enters query (disease or drug name)
-2. Intent mapper resolves to CTD entity via Claude Haiku (with difflib fuzzy fallback)
-3. BioWordVec encodes the entity to a 200-dim vector
-4. MLP scores all candidates in a single batched forward pass (~0.1s)
-5. Temperature scaling converts logits to calibrated probabilities
-6. Confidence tiers assigned (Strong/Moderate/Speculative)
-7. Async enrichment gathers PubMed counts, FDA status, and clinical trials in parallel
-8. Perplexity searches for evidence on top 5 candidates (verdict, TL;DR, pathway, quality, interactions)
-9. Claude generates plain-English explanations for top 10 candidates
-10. Results rendered in Streamlit with interactive cards, filters, and export options
+### B. Data Flow
 
-### 3.3 File Structure
+A user's query follows a deterministic path through the system. The intent mapper first resolves the free-text input to a CTD entity using Claude Haiku, with `difflib`-based fuzzy matching as a fallback when the API is unavailable or returns low-confidence results. The resolved entity passes to the model layer, where BioWordVec encodes it to a 200-dimensional vector. The MLP scores all candidate entities — 7,163 drugs in disease-to-drug mode, or 2,525 diseases in reverse mode — in a single batched forward pass that completes in roughly 100 milliseconds. Temperature scaling converts the resulting logits to calibrated probabilities, which are bucketed into Strong, Moderate, and Speculative confidence tiers.
+
+In parallel with rendering the initial results, the enrichment layer dispatches five concurrent asynchronous calls. PubMed E-utilities returns publication co-occurrence counts for each drug-disease pair, providing a coarse signal of how much existing literature discusses the combination. OpenFDA returns approval status for each drug. ClinicalTrials.gov returns active and completed trial counts with linkable trial IDs. Perplexity Sonar performs deep evidence retrieval on the top five candidates, returning a structured object containing the verdict, a one-sentence summary, the proposed mechanism pathway, the strongest available evidence quality, and any documented dangerous interactions. Claude Haiku generates plain-language explanations for the top ten candidates. Once all responses are gathered, results are rendered in Streamlit with interactive cards, filtering controls, and export options.
+
+### C. Codebase Structure
+
+The repository is organized to separate the prediction core, the enrichment integrations, the explanation layer, and the user interface, with each layer testable in isolation:
 
 ```
 biolink-v2/
@@ -233,56 +206,56 @@ biolink-v2/
 └── README.md
 ```
 
----
+This separation made it possible for team members to work in parallel on different layers without significant merge conflicts, and made it straightforward to test individual API integrations without spinning up the full pipeline.
 
-## 4. Challenges and Solutions
+## IV. Challenges and Solutions
 
-### Challenge 1: Model Confidence vs. Real-World Evidence
+Several substantive challenges arose during development, each illustrating something interesting about the gap between a research model and a deployed product. We discuss the five most consequential ones below.
 
-**Problem:** The MLP model assigns high confidence scores based on knowledge graph topology, but this doesn't always align with clinical evidence. For example, immunosuppressants like Cyclosporine scored 99% for Lyme Disease — a bacterial infection where immunosuppression would be harmful.
+### A. Model Confidence vs. Real-World Evidence
 
-**Solution:** We integrated Perplexity Sonar to ground every prediction in published literature. The evidence verdict system (Supports/Conflicts/Standard-of-Care/Insufficient) gives users a second, independent signal. When the model says "99% Strong" but evidence says "Evidence Conflicts," users see both — and the conflict itself is informative.
+The first challenge surfaced almost immediately after the basic prediction pipeline was working. The MLP model assigned high confidence scores based on patterns in the knowledge graph, but those patterns did not always align with clinical reality. An early test query returned cyclosporine — an immunosuppressant — at 99% confidence for Lyme disease. Lyme is a bacterial infection, and immunosuppression in this context would be actively harmful, not therapeutic. The model's confidence was a reflection of cyclosporine's frequent co-occurrence with various inflammatory conditions in the training data, not a genuine therapeutic relationship. Surfacing this prediction without context would have been at best confusing and at worst dangerous.
 
-**AI tools helped:** Claude Code designed the structured prompt that extracts verdict, TL;DR, evidence quality, pathway, and interaction data from a single Perplexity API call, minimizing cost while maximizing information density.
+We addressed this by integrating Perplexity Sonar to ground every prediction in the published literature, then surfacing the model's confidence and the evidence verdict as two independent signals that the user evaluates together. When the model says "99% Strong" and the evidence verdict says "Evidence Conflicts," the disagreement itself is informative — it tells the user that a statistically suggestive pattern exists in the knowledge graph but that published research does not support a therapeutic application. Claude Code helped us design the structured Perplexity prompt that extracts verdict, summary, evidence quality, mechanism pathway, and interaction data in a single API call, minimizing cost while maximizing the information returned per query.
 
-### Challenge 2: API Cost Management
+### B. API Cost Management
 
-**Problem:** With 20 drug candidates per query, calling Perplexity for each would cost ~$0.10/query. At scale, this becomes prohibitive for a student project.
+A naive implementation would query Perplexity for evidence on every candidate. With twenty drug candidates per query and Perplexity Sonar costing roughly half a cent per call, this would have produced a per-query cost of about ten cents — manageable for a demonstration but prohibitive for any sustained use, particularly given that we are funding the API costs out of pocket for a student project.
 
-**Solution:** We limit evidence search to the top 5 candidates (where it matters most), use Claude Haiku instead of Opus/Sonnet for entity resolution and explanations (~60x cheaper), and use free APIs (PubMed, OpenFDA, ClinicalTrials.gov) for basic enrichment on all 20 results.
+We adopted a tiered approach. The expensive evidence search runs only on the top five candidates, where it has the most information value. Free APIs — PubMed, OpenFDA, and ClinicalTrials.gov — handle baseline enrichment for all twenty results, providing the user with publication counts, approval status, and trial information at no marginal cost. For entity resolution and explanation generation, we use Claude Haiku rather than Opus or Sonnet, which are roughly sixty times more expensive but offer little practical accuracy benefit for these constrained tasks. The end result is a per-query cost of roughly two to three cents, which is sustainable. Claude Code identified this cost bottleneck early and proposed the tiered architecture before we had even encountered it as an operational concern.
 
-**AI tools helped:** Claude Code identified the cost bottleneck and suggested the tiered approach — expensive evidence search for top 5, cheap enrichment for all 20, and Claude Haiku for intent mapping.
+### C. Entity Resolution for Free-Text Input
 
-### Challenge 3: Entity Resolution for Free-Text Input
+A predictive model trained on standardized vocabularies cannot accept free-text input directly. CTD identifies diseases by canonical names like "Myocardial Infarction," but real users type "heart attack," or "MI," or "had a heart attack last year." The model produces meaningful scores only when the input is mapped to a recognized CTD entity, and a poor mapping produces nonsense results regardless of how good the underlying model is.
 
-**Problem:** Users type diseases in many forms ("heart attack" vs "Myocardial Infarction" vs "MI"). The model needs exact CTD entity names to produce meaningful scores.
+We implemented a two-tier entity resolution strategy. Claude Haiku performs the primary mapping, using a system prompt that instructs the model to return both a canonical CTD entity name and a confidence level. When Haiku reports low confidence, the application surfaces a clarification dialog asking the user to choose between candidate matches. As a fallback for offline operation or API failures, `difflib`-based fuzzy string matching provides reasonable but lower-accuracy resolution. During development we encountered a subtle bug in which Haiku — unlike larger Anthropic models — sometimes returned "low" confidence even for exact matches, causing unnecessary clarification prompts on perfectly clear queries. Claude Code helped us identify the cause and fix the intent mapper to skip clarification when the returned entity was already a valid CTD identifier, which restored the responsiveness of the UI for the common case of well-formed queries.
 
-**Solution:** Two-tier entity resolution: Claude Haiku maps natural language to CTD entities with high accuracy, with difflib fuzzy matching as a fallback when the API is unavailable. The system prompt instructs the LLM to return confidence levels, and low-confidence matches trigger a clarification prompt.
+### D. Reverse Search Architecture
 
-**AI tools helped:** Claude Code designed the system prompt and fallback logic. It also identified a bug where Haiku returned "low" confidence for exact matches (unlike Opus), and fixed the intent mapper to skip clarification when the entity is valid.
+The original v1 model supported only disease-to-drug search. A common user need, however, is the inverse: someone who is taking a drug for one condition wants to know what other conditions it might treat. Implementing this required scoring all 2,525 diseases against a single drug — and disease embeddings were not pre-cached, since the v1 system had no need for them.
 
-### Challenge 4: Reverse Search Architecture
+The solution was conceptually straightforward but required some careful engineering. We pre-compute and cache all 2,525 disease embeddings at model load time, which adds 1.4 MB of memory but enables instant reverse queries. The new `score_all_diseases()` method mirrors the existing `score_all_drugs()` exactly: same feature vector construction, same batched forward pass, same calibration. This was architecturally feasible because the MLP's feature vector is symmetric — concatenating drug and disease embeddings, then computing their absolute difference and element-wise product, produces meaningful representations regardless of which entity is being held fixed and which is varying. Claude Code analyzed the model architecture, confirmed the symmetry, and implemented the new method as a mirror of the existing one with the argument ordering carefully preserved, since a transposition there would have produced subtly wrong scores rather than an outright crash.
 
-**Problem:** The original model only supported disease-to-drug search. Adding drug-to-disease required scoring all 2,525 diseases — but disease embeddings weren't pre-cached.
+### E. PDF Export with Unicode
 
-**Solution:** We pre-compute and cache all 2,525 disease embeddings at model load time (only 1.4MB extra memory). The `score_all_diseases()` method mirrors `score_all_drugs()` exactly — same feature vector construction, same batched forward pass, same calibration. This was architecturally feasible because the MLP's feature vector is symmetric.
+The most stubborn engineering issue arose in a place we had not expected: PDF export. The fpdf2 library defaults to fonts that support only the latin-1 character encoding. Evidence text from Perplexity routinely contains em dashes, smart quotes, non-breaking spaces, and other Unicode characters that crash the PDF generator with cryptic encoding errors. A first-pass fix that simply stripped non-latin-1 characters from input strings was insufficient: the cursor position in fpdf2 drifts after automatic page breaks, and certain code paths emit "not enough horizontal space" errors when the cursor lands too close to the right margin.
 
-**AI tools helped:** Claude Code analyzed the model architecture, confirmed the feature vector symmetry, and implemented `score_all_diseases()` as a mirror of the existing method with correct argument ordering.
+The eventual solution combined two helper functions. A `_safe()` function preprocesses every string before it reaches fpdf2, replacing common Unicode characters with their ASCII equivalents (em dash to hyphen, smart quote to straight quote, and so on) and then dropping anything that remains outside latin-1. A `_mc()` wrapper for `multi_cell` calls explicitly resets the cursor to the left margin before each emission, eliminating the position-drift class of errors. Claude Code identified the cursor drift as the root cause after we had iterated through three different approaches that did not fully resolve the issue. The PDF export now produces clean output even when the underlying evidence text contains a mix of typographic and ASCII characters, which is the realistic input distribution.
 
-### Challenge 5: PDF Export with Unicode
+## References
 
-**Problem:** fpdf2's default fonts only support latin-1 encoding. Evidence text from Perplexity contains em dashes, smart quotes, and other Unicode characters that crash the PDF generator.
+::: refs
 
-**Solution:** A `_safe()` function replaces common Unicode characters with ASCII equivalents and strips remaining non-latin-1 characters. A `_mc()` wrapper ensures the cursor is always at the left margin before `multi_cell` calls, preventing "not enough horizontal space" errors from cursor position drift.
+[1] J. A. DiMasi, H. G. Grabowski, and R. W. Hansen, "Innovation in the pharmaceutical industry: New estimates of R&D costs," *J. Health Econ.*, vol. 47, pp. 20–33, May 2016.
 
-**AI tools helped:** Claude Code identified the root cause (cursor position after auto page break) and iterated through three fixes before arriving at the robust solution.
+[2] S. Pushpakom *et al.*, "Drug repurposing: progress, challenges and recommendations," *Nat. Rev. Drug Discov.*, vol. 18, no. 1, pp. 41–58, Jan. 2019.
 
----
+[3] A. P. Davis *et al.*, "Comparative Toxicogenomics Database (CTD): update 2023," *Nucleic Acids Res.*, vol. 51, no. D1, pp. D1257–D1262, Jan. 2023.
 
-## 5. References
+[4] D. Haggett, "BioLink: Knowledge graph-based drug repurposing with BioWordVec embeddings," 2024. [Online]. Available: https://dustinhaggett.com/papers/biolink-paper.pdf
 
-- DiMasi, J.A., Grabowski, H.G., & Hansen, R.W. (2016). Innovation in the pharmaceutical industry: New estimates of R&D costs. *Journal of Health Economics*, 47, 20-33.
-- Zhang, Y., Chen, Q., Yang, Z., Lin, H., & Lu, Z. (2019). BioWordVec, improving biomedical word embeddings with subword information and MeSH. *Scientific Data*, 6(1), 52.
-- Davis, A.P., et al. (2023). Comparative Toxicogenomics Database (CTD): update 2023. *Nucleic Acids Research*, 51(D1), D1257-D1262.
-- Pushpakom, S., et al. (2019). Drug repurposing: progress, challenges and recommendations. *Nature Reviews Drug Discovery*, 18(1), 41-58.
-- Haggett, D. (2024). BioLink: Knowledge Graph-Based Drug Repurposing with BioWordVec Embeddings. dustinhaggett.com/papers/biolink-paper.pdf
+[5] Y. Zhang, Q. Chen, Z. Yang, H. Lin, and Z. Lu, "BioWordVec, improving biomedical word embeddings with subword information and MeSH," *Sci. Data*, vol. 6, no. 1, p. 52, May 2019.
+
+[6] C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, "On calibration of modern neural networks," in *Proc. 34th Int. Conf. Mach. Learn.*, 2017, pp. 1321–1330.
+
+:::
