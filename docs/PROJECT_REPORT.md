@@ -35,7 +35,7 @@ Despite these successes, systematic repurposing remains difficult in practice. I
 
 The relationships between drugs and diseases form an enormous knowledge graph. The Comparative Toxicogenomics Database alone catalogs over seven thousand drugs, twenty-five hundred diseases, and hundreds of thousands of curated chemical-disease interactions drawn from the published biomedical literature [3]. Patterns in this graph — which compound classes tend to act on which biological pathways, which disease clusters share underlying mechanisms, which drugs have unexpected affinities for proteins outside their primary targets — are not feasibly identifiable through manual review. A machine learning model trained on this data, however, can learn these latent patterns and surface candidate associations that a human expert might never investigate.
 
-Our prior work on BioLink v1 [4] demonstrated this concretely. A multi-layer perceptron trained on BioWordVec embeddings of drug-disease pairs achieved an AUC of 0.947 on held-out CTD data, meaning the model can reliably distinguish documented drug-disease associations from random pairings. BioLink v2 extends this research model into a consumer-facing application that makes its predictions accessible, interpretable, and grounded in real-world evidence — work that required substantial additional engineering around calibration, entity resolution, evidence integration, and user interface design.
+BioLink demonstrates this concretely. A multi-layer perceptron trained on BioWordVec embeddings of drug-disease pairs achieves an AUC of 0.947 on held-out CTD data, meaning the model can reliably distinguish documented drug-disease associations from random pairings. We wrap that model in a consumer-facing application that makes its predictions accessible, interpretable, and grounded in real-world evidence — work that required substantial engineering around calibration, entity resolution, evidence integration, and user interface design.
 
 ### D. Societal Impact
 
@@ -45,9 +45,7 @@ Accessible drug repurposing tools have outsized social value. Roughly ninety-fiv
 
 ### A. Solution Approach
 
-BioLink v2 is a full-stack web application built around a trained MLP classifier and a multi-stage pipeline that turns natural-language queries into ranked, evidence-grounded predictions. Users enter a disease name in plain English and receive a ranked list of drug candidates with calibrated confidence scores, each annotated with literature-derived evidence, FDA approval status, current clinical trials, and a plain-language explanation of why the candidate scored as it did. A reverse mode lets users enter a drug name and discover other conditions it might treat — a query pattern of particular interest to patients already taking a medication for one condition who want to know what else it might help.
-
-BioLink v2 builds directly on the open-source v1 codebase [4]; the v1 system was an academic prototype consisting of a training notebook and a minimal demo, and most v2 work was about building the production infrastructure around the trained weights rather than retraining the model itself.
+BioLink is a full-stack web application built around a trained MLP classifier and a multi-stage pipeline that turns natural-language queries into ranked, evidence-grounded predictions. Users enter a disease name in plain English and receive a ranked list of drug candidates with calibrated confidence scores, each annotated with literature-derived evidence, FDA approval status, current clinical trials, and a plain-language explanation of why the candidate scored as it did. A reverse mode lets users enter a drug name and discover other conditions it might treat — a query pattern of particular interest to patients already taking a medication for one condition who want to know what else it might help.
 
 The pipeline is designed around a core principle: model confidence alone is not enough. A high-scoring candidate from a knowledge graph model may reflect statistical patterns that fail to align with clinical reality, and a low-scoring candidate may simply lack training data despite being therapeutically promising. By layering evidence retrieval, mechanism-of-action analysis, and trial-status lookups on top of the raw model output, BioLink turns each prediction into something the user can actually evaluate, rather than a black-box ranking that demands trust.
 
@@ -57,28 +55,49 @@ The end-to-end flow has six stages. A user types a query in natural language; th
 
 The core model is a multi-layer perceptron classifier. Each input is an 800-dimensional feature vector formed by concatenating the BioWordVec embeddings of a drug and a disease (200 dimensions each) with the absolute element-wise difference and element-wise product of those embeddings (another 200 dimensions each). This feature construction, drawn from prior work on knowledge graph completion, gives the model both the raw entity representations and a measure of their similarity in embedding space. The hidden layer contains 256 neurons with batch normalization, ReLU activation, and 30% dropout for regularization. The output is a single logit, which becomes a probability after sigmoid activation. We considered larger and deeper architectures during early experimentation, but the additional capacity offered no meaningful improvement on the held-out test set — a finding consistent with the relatively limited dimensionality and noise structure of the task.
 
-Training was performed on approximately 380,000 drug-disease pairs from CTD, with negative examples generated by random pairing of drugs and diseases that did not co-occur in the database, at a 1:1 positive-to-negative ratio. The dataset was partitioned into 80/10/10 train/validation/test splits with a fixed random seed. Hyperparameter selection used a small grid search over hidden-layer width, dropout rate, and learning rate. Headline performance and runtime characteristics are summarized in Table II. Qualitative review by team members familiar with the biomedical literature proved the most informative evaluation beyond these numbers: AUC summarizes discriminative ability but does not by itself reveal whether the model's top predictions are plausible to a domain expert.
+Training data was drawn from CTD's curated chemical-disease associations, filtered to therapeutic-direct-evidence rows (`DirectEvidence == "therapeutic"`), yielding 39,265 positive drug-disease pairs. We generated an equal number of negative pairs by random sampling drug-disease combinations that did not appear in CTD, producing a balanced dataset of 78,530 examples. This was partitioned into 70/15/15 train/validation/test splits with stratification on the label and a fixed random seed. Hyperparameter selection used a small grid search over hidden-layer width, dropout rate, and learning rate. Headline performance and runtime characteristics are summarized in Table II, and Fig. 1 shows the corresponding ROC and precision-recall curves on the held-out test set. For comparison, we also evaluated a transformer-embedding baseline (sentence-transformers `all-MiniLM-L6-v2`) under the same pipeline; it reached AUC 0.912, confirming that the domain-specific BioWordVec embeddings give a meaningful lift over general-purpose sentence embeddings on this task. Qualitative review by team members familiar with the biomedical literature proved the most informative evaluation beyond these numbers: AUC summarizes discriminative ability but does not by itself reveal whether the model's top predictions are plausible to a domain expert.
 
-| Metric | Value |
+| Metric | BioWordVec | Transformer |
+|---|---|---|
+| Test accuracy | 0.872 | 0.835 |
+| Test AUC | 0.947 | 0.912 |
+| Average precision | 0.948 | 0.911 |
+| Precision@10 | 1.000 | 1.000 |
+| Precision@100 | 1.000 | 1.000 |
+| Expected Calibration Error (pre-scaling) | 0.087 | — |
+| Expected Calibration Error (post-scaling) | 0.024 | — |
+
+[Table II: Model performance on the held-out test set. The transformer baseline uses sentence-transformers `all-MiniLM-L6-v2` embeddings in the same MLP pipeline.]{.figure-caption}
+
+| Runtime metric | Value |
 |---|---|
-| Test AUC | 0.947 |
-| Expected Calibration Error (pre-scaling) | 0.087 |
-| Expected Calibration Error (post-scaling) | 0.024 |
 | MLP inference latency (CPU, batched) | ~100 ms |
 | End-to-end query latency | 2–3 s |
 | Drug candidates scored per query | 7,163 |
 | Disease candidates scored per query | 2,525 |
 | Per-query API cost (typical) | $0.02–$0.03 |
 
-[Table II: Model performance and runtime characteristics.]{.figure-caption}
+[Table III: Runtime characteristics of the deployed system.]{.figure-caption}
+
+::: figure-wide
+![](../results/roc_pr_biowordvec.png)
+:::
+
+[Fig. 1. ROC curve (left, AUC = 0.947) and precision-recall curve (right, AP = 0.948) for the BioWordVec MLP on the held-out CTD test set.]{.figure-caption}
 
 We considered more complex architectures such as graph neural networks and transformer-based knowledge graph models, but stayed with the MLP because of deployment and latency constraints. Inference runs in milliseconds on CPU, which made it practical to deploy on Hugging Face Spaces' free tier without GPU acceleration.
 
-Embeddings come from BioWordVec [5], a 200-dimensional word embedding model pre-trained on PubMed abstracts and MIMIC-III clinical notes. BioWordVec is well-suited to the biomedical domain because its training corpus captures the semantic relationships between medical terms that general-purpose embeddings such as Word2Vec or GloVe miss. Drug and disease names are tokenized, embedded per-token, and mean-pooled into a single 200-dimensional vector. This pooling operation is straightforward but has the important property of being invariant to the number of tokens in the entity name — a single-word drug like "metformin" and a multi-word disease like "chronic obstructive pulmonary disease" produce comparably dimensioned representations. We considered more sophisticated pooling strategies (attention-weighted averaging, max pooling) but found that simple mean pooling performed comparably while being substantially cheaper at inference time.
+Embeddings come from BioWordVec [4], a 200-dimensional word embedding model pre-trained on PubMed abstracts and MIMIC-III clinical notes. BioWordVec is well-suited to the biomedical domain because its training corpus captures the semantic relationships between medical terms that general-purpose embeddings such as Word2Vec or GloVe miss. Drug and disease names are tokenized, embedded per-token, and mean-pooled into a single 200-dimensional vector. This pooling operation is straightforward but has the important property of being invariant to the number of tokens in the entity name — a single-word drug like "metformin" and a multi-word disease like "chronic obstructive pulmonary disease" produce comparably dimensioned representations. We considered more sophisticated pooling strategies (attention-weighted averaging, max pooling) but found that simple mean pooling performed comparably while being substantially cheaper at inference time.
 
-One issue with neural network classifiers is that their probability outputs are often poorly calibrated — a model might assign 99% confidence to predictions that are correct only 70% of the time. That becomes especially problematic in a healthcare-adjacent application where users may interpret confidence scores too literally. To address this, we apply post-hoc temperature scaling [6], a single-parameter calibration method that adjusts the output logits without changing the model's discriminative ranking. The temperature parameter is fit on a held-out validation set by minimizing the negative log-likelihood of the calibrated predictions. The calibrated probabilities are then bucketed into three confidence tiers presented to the user: Strong (≥80%), Moderate (50–79%), and Speculative (<50%). This tiering helps users interpret raw probability scores in clinically meaningful terms, and the reliability diagram in our results directory confirms that the calibrated probabilities track empirical accuracy closely.
+One issue with neural network classifiers is that their probability outputs are often poorly calibrated — a model might assign 99% confidence to predictions that are correct only 70% of the time. That becomes especially problematic in a healthcare-adjacent application where users may interpret confidence scores too literally. To address this, we apply post-hoc temperature scaling [5], a single-parameter calibration method that adjusts the output logits without changing the model's discriminative ranking. The temperature parameter is fit on a held-out validation set by minimizing the negative log-likelihood of the calibrated predictions. The calibrated probabilities are then bucketed into three confidence tiers presented to the user: Strong (≥80%), Moderate (50–79%), and Speculative (<50%). This tiering helps users interpret raw probability scores in clinically meaningful terms. The reliability diagram in Fig. 2 confirms the calibration: before scaling the model is mildly under-confident in the mid-range, and after scaling the predicted accuracy tracks the diagonal closely across all bins.
 
-The model was originally designed only for disease-to-drug search. We extended it for v2 by exploiting an architectural property: the feature vector construction is symmetric. The same MLP can score arbitrary drug-disease pairs in either direction, and the only practical bottleneck for a reverse query is having pre-computed embeddings for all 2,525 candidate diseases. By caching these at startup (an extra 1.4 MB of memory), the reverse search runs in approximately the same time as forward search, which made the new feature feasible without any model retraining.
+::: figure-wide
+![](../results/reliability_diagram.png)
+:::
+
+[Fig. 2. Reliability diagram before and after temperature scaling. The diagonal represents perfect calibration. Bars show the empirical accuracy of predictions binned by confidence; after scaling, the bars align closely with the diagonal across the full confidence range.]{.figure-caption}
+
+The model was originally designed only for disease-to-drug search. We later extended it to support drug-to-disease queries by exploiting an architectural property: the feature vector construction is symmetric. The same MLP can score arbitrary drug-disease pairs in either direction, and the only practical bottleneck for a reverse query is having pre-computed embeddings for all 2,525 candidate diseases. By caching these at startup (an extra 1.4 MB of memory), the reverse search runs in approximately the same time as forward search, which made the new feature feasible without any model retraining.
 
 ### C. Pipeline and Multi-API Integration
 
@@ -138,7 +157,7 @@ There are several important limitations to the system. The model is trained on d
 
 ### A. System Architecture Diagram
 
-The deployed system follows a request-response architecture with parallel enrichment. A user query enters the intent mapper, gets resolved to a canonical entity, flows through the MLP classifier, and then fans out to the five enrichment APIs in parallel before being aggregated and rendered in the UI. Fig. 1 summarizes the flow.
+The deployed system follows a request-response architecture with parallel enrichment. A user query enters the intent mapper, gets resolved to a canonical entity, flows through the MLP classifier, and then fans out to the five enrichment APIs in parallel before being aggregated and rendered in the UI. Fig. 3 summarizes the flow.
 
 ```
                            User Input
@@ -184,7 +203,7 @@ The deployed system follows a request-response architecture with parallel enrich
                          User Output
 ```
 
-[Fig. 1. End-to-end system architecture, showing the flow from natural-language query through intent mapping, MLP scoring, parallel enrichment, and Streamlit rendering.]{.figure-caption}
+[Fig. 3. End-to-end system architecture, showing the flow from natural-language query through intent mapping, MLP scoring, parallel enrichment, and Streamlit rendering.]{.figure-caption}
 
 ### B. Data Flow
 
@@ -197,7 +216,7 @@ In parallel with rendering the initial results, the enrichment layer dispatches 
 The repository is organized to separate the prediction core, the enrichment integrations, the explanation layer, and the user interface, with each layer testable in isolation:
 
 ```
-biolink-v2/
+biolink/
 ├── app.py                      # Streamlit entry point, session state, pipeline orchestration
 ├── core/
 │   ├── model.py                # BioLinkModel: MLP + BioWordVec, score_all_drugs/diseases
@@ -255,7 +274,7 @@ We implemented a two-tier entity resolution strategy. Claude Haiku performs the 
 
 ### D. Reverse Search Architecture
 
-The original v1 model supported only disease-to-drug search. A common user need, however, is the inverse: someone who is taking a drug for one condition wants to know what other conditions it might treat. Implementing this required scoring all 2,525 diseases against a single drug — and disease embeddings were not pre-cached, since the v1 system had no need for them.
+The model was originally designed only for disease-to-drug search. A common user need, however, is the inverse: someone who is taking a drug for one condition wants to know what other conditions it might treat. Implementing this required scoring all 2,525 diseases against a single drug — and disease embeddings were not pre-cached, since the original training and inference paths had no need for them.
 
 The solution was conceptually straightforward but required some careful engineering. We pre-compute and cache all 2,525 disease embeddings at model load time, which adds 1.4 MB of memory but enables instant reverse queries. The new `score_all_diseases()` method mirrors the existing `score_all_drugs()` exactly: same feature vector construction, same batched forward pass, same calibration. This was architecturally feasible because the MLP's feature vector is symmetric — concatenating drug and disease embeddings, then computing their absolute difference and element-wise product, produces meaningful representations regardless of which entity is being held fixed and which is varying. Claude Code analyzed the model architecture, confirmed the symmetry, and implemented the new method as a mirror of the existing one with the argument ordering carefully preserved, since a transposition there would have produced subtly wrong scores rather than an outright crash.
 
@@ -275,10 +294,8 @@ We eventually solved this with two helper functions. A `_safe()` function prepro
 
 [3] A. P. Davis *et al.*, "Comparative Toxicogenomics Database (CTD): update 2023," *Nucleic Acids Res.*, vol. 51, no. D1, pp. D1257–D1262, Jan. 2023.
 
-[4] D. Haggett, "BioLink: Knowledge graph-based drug repurposing with BioWordVec embeddings," 2024. [Online]. Available: https://dustinhaggett.com/papers/biolink-paper.pdf
+[4] Y. Zhang, Q. Chen, Z. Yang, H. Lin, and Z. Lu, "BioWordVec, improving biomedical word embeddings with subword information and MeSH," *Sci. Data*, vol. 6, no. 1, p. 52, May 2019.
 
-[5] Y. Zhang, Q. Chen, Z. Yang, H. Lin, and Z. Lu, "BioWordVec, improving biomedical word embeddings with subword information and MeSH," *Sci. Data*, vol. 6, no. 1, p. 52, May 2019.
-
-[6] C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, "On calibration of modern neural networks," in *Proc. 34th Int. Conf. Mach. Learn.*, 2017, pp. 1321–1330.
+[5] C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, "On calibration of modern neural networks," in *Proc. 34th Int. Conf. Mach. Learn.*, 2017, pp. 1321–1330.
 
 :::
