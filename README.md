@@ -17,7 +17,7 @@ Built for AAI 595 (Applied ML) at Stevens Institute of Technology.
 ## Demo
 
 - **Live app:** https://huggingface.co/spaces/dustinhaggett/biolink-v2
-- **Video walkthrough:** [docs/BioLink_Demo.mp4](docs/BioLink_Demo.mp4)
+- **Video walkthrough:** https://drive.google.com/file/d/1ouB0oc3axqU4nIPEzvJqs-2kHb7PqK8V/view?usp=sharing (also in [docs/BioLink_Demo.mp4](docs/BioLink_Demo.mp4))
 - **Project report:** [docs/PROJECT_REPORT.pdf](docs/PROJECT_REPORT.pdf)
 
 ## Features
