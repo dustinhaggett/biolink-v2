@@ -1,8 +1,19 @@
 # Environment
 .env
 .streamlit/secrets.toml
+
+# Python
 __pycache__/
 *.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # Large binary data (not suitable for git)
 data/BioWordVec_PubMed_MIMICIII_d200.vec.bin
@@ -24,6 +35,10 @@ data/val_labels_*.npy
 
 # Claude Code local config
 .claude/
+
+# Local-only documentation source / generators (the PDF and pptx are the deliverables)
+docs/*.md
+docs/*.py
 
 # Archive
 *.zip
