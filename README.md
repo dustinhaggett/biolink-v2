@@ -50,18 +50,23 @@ pip install -r requirements.txt
 
 ### 3. Download large data files
 
-These files are too large for git and must be downloaded separately:
+The trained model weights (`models/biolink_v1.pt`) and cached entity embeddings (`data/drug_embeddings.npy`, `data/disease_embeddings.npy`) are already in the repo, so the app can run out of the box. Two large source files are excluded from git and only needed if you want to retrain the model or rebuild the embedding caches from scratch:
 
 | File | Size | Location | Source |
 |------|------|----------|--------|
 | BioWordVec embeddings | ~13 GB | `data/BioWordVec_PubMed_MIMICIII_d200.vec.bin` | [NCBI/NLM](https://ftp.ncbi.nlm.nih.gov/pub/lu/Suppl/BioSentVec/BioWordVec_PubMed_MIMICIII_d200.vec.bin) |
-| Model weights | ~810 KB | `models/biolink_v1.pt` | Contact repo owner |
-| CTD data (optional) | ~152 MB | `data/CTD_chemicals_diseases.tsv.gz` | [CTD downloads](https://ctdbase.org/downloads/) |
+| CTD chemicals-diseases | ~152 MB | `data/CTD_chemicals_diseases.tsv.gz` | [CTD downloads](https://ctdbase.org/downloads/) |
 
-Download the BioWordVec file:
+Download BioWordVec:
 ```bash
 curl -L -o data/BioWordVec_PubMed_MIMICIII_d200.vec.bin \
   https://ftp.ncbi.nlm.nih.gov/pub/lu/Suppl/BioSentVec/BioWordVec_PubMed_MIMICIII_d200.vec.bin
+```
+
+Download CTD:
+```bash
+curl -L -o data/CTD_chemicals_diseases.tsv.gz \
+  https://ctdbase.org/reports/CTD_chemicals_diseases.tsv.gz
 ```
 
 ### 4. API keys (optional)
@@ -85,6 +90,25 @@ streamlit run app.py
 ```
 
 The app will open at `http://localhost:8501`.
+
+## Reproducing Training From Scratch
+
+The committed model weights and cached embeddings let the app run without retraining. If you want to reproduce training end-to-end:
+
+```bash
+# 1. Train the MLP and produce val_logits / val_labels / model weights
+python scripts/generate_v1_artifacts.py \
+    --ctd data/CTD_chemicals_diseases.tsv.gz \
+    --biowordvec data/BioWordVec_PubMed_MIMICIII_d200.vec.bin
+
+# 2. Cache per-entity BioWordVec embeddings for fast inference
+python scripts/cache_embeddings.py
+
+# 3. Fit temperature scaling and produce the reliability diagram
+python scripts/fit_temperature.py
+```
+
+The underlying training code lives in [`v1_source/biolink-ctd-drug-disease-main/`](v1_source/biolink-ctd-drug-disease-main/) — see its `README.md` for additional context and the original methodology. On an Apple Silicon laptop the full pipeline runs end-to-end in roughly 15-25 minutes; the bottleneck is loading the 13 GB BioWordVec embeddings.
 
 ## Project Structure
 
