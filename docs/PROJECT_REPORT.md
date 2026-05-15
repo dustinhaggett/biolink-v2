@@ -1,9 +1,9 @@
 # BioLink: AI-Powered Drug Repurposing Discovery
 
 **AAI 595 — Applied Machine Learning**
-**Dr. Tao Han, Drexel University**
+**Dr. Tao Han, Stevens Institute of Technology**
 
-**Team:** Dustin Haggett, Kera Prosper, Esume
+**Team:** Dustin Haggett, Kera Prosper, Mia Braun
 
 ---
 

@@ -112,7 +112,7 @@ add_text(slide, 1, 1.5, 11, 1.2, "BioLink", size=52, color=TEAL, bold=True, alig
 add_text(slide, 1, 2.7, 11, 0.8, "AI-Powered Drug Repurposing Discovery", size=28, color=ACCENT_BLUE, align=PP_ALIGN.CENTER)
 add_text(slide, 1, 3.8, 11, 0.5, "Turning a research model into a tool that patients, researchers, and clinicians can actually use", size=16, color=LIGHT_GRAY, align=PP_ALIGN.CENTER)
 add_text(slide, 1, 5.5, 11, 0.4, "AAI 595 — Applied Machine Learning  |  Dr. Tao Han", size=14, color=LIGHT_GRAY, align=PP_ALIGN.CENTER)
-add_text(slide, 1, 6.0, 11, 0.4, "Dustin Haggett  |  Kera Prosper  |  Esume", size=14, color=WHITE, align=PP_ALIGN.CENTER)
+add_text(slide, 1, 6.0, 11, 0.4, "Dustin Haggett  |  Kera Prosper  |  Mia Braun", size=14, color=WHITE, align=PP_ALIGN.CENTER)
 
 # ═══════════════════════════════════════════════════
 # SLIDE 2: The Problem

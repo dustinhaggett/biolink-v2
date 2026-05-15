@@ -12,7 +12,7 @@ pinned: false
 
 Drug repurposing discovery tool powered by knowledge graph AI. Search by disease to find ranked drug candidates, or search by drug to find conditions it may treat.
 
-Built for AAI 595 (Applied ML) at Drexel University.
+Built for AAI 595 (Applied ML) at Stevens Institute of Technology.
 
 ## Demo
 
