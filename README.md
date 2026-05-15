@@ -14,6 +14,12 @@ Drug repurposing discovery tool powered by knowledge graph AI. Search by disease
 
 Built for AAI 595 (Applied ML) at Drexel University.
 
+## Demo
+
+- **Live app:** https://huggingface.co/spaces/dustinhaggett/biolink-v2
+- **Video walkthrough:** [docs/BioLink_Demo.mp4](docs/BioLink_Demo.mp4)
+- **Project report:** [docs/PROJECT_REPORT.pdf](docs/PROJECT_REPORT.pdf)
+
 ## Features
 
 - **Disease search** — Enter a disease, get ranked drug repurposing candidates with calibrated confidence scores
